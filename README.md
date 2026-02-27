@@ -5,6 +5,7 @@ Web app semplice (HTML/CSS/JS) per gestire una gara di calcio:
 - dettagli gara (squadre, data, orario, stadio, arbitro)
 - formazioni casa/ospite
 - eventi partita (gol, ammonizioni, espulsioni, sostituzioni, rigori sbagliati)
+- cronometro gara con minuto automatico per gli eventi
 - cronologia eventi con eliminazione
 - punteggio automatico e statistiche disciplinari
 - persistenza locale tramite `localStorage`

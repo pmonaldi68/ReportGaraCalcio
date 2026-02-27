@@ -13,6 +13,11 @@ const defaultState = {
     home: [],
     away: [],
   },
+  clock: {
+    elapsedSeconds: 0,
+    running: false,
+    lastTick: null,
+  },
   events: [],
 };
 
@@ -25,6 +30,7 @@ const eventLabels = {
 };
 
 let state = loadState();
+let clockInterval = null;
 
 const matchForm = document.querySelector("#match-form");
 const homeLineupForm = document.querySelector("#home-lineup-form");
@@ -37,6 +43,13 @@ const scoreline = document.querySelector("#scoreline");
 const stats = document.querySelector("#stats");
 const resetBtn = document.querySelector("#reset-btn");
 const lineupItemTemplate = document.querySelector("#lineup-item-template");
+const minuteInput = eventForm.minute;
+const autoMinuteInput = eventForm.autoMinute;
+const clockDisplay = document.querySelector("#clock-display");
+const clockMinute = document.querySelector("#clock-minute");
+const clockStartBtn = document.querySelector("#clock-start");
+const clockPauseBtn = document.querySelector("#clock-pause");
+const clockResetBtn = document.querySelector("#clock-reset");
 
 matchForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -55,12 +68,21 @@ matchForm.addEventListener("submit", (event) => {
 homeLineupForm.addEventListener("submit", (event) => addLineupPlayer(event, "home", homeLineupForm));
 awayLineupForm.addEventListener("submit", (event) => addLineupPlayer(event, "away", awayLineupForm));
 
+autoMinuteInput.addEventListener("change", () => {
+  minuteInput.readOnly = autoMinuteInput.checked;
+  if (autoMinuteInput.checked) {
+    setEventMinuteFromClock();
+  }
+});
+
 eventForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const formData = new FormData(eventForm);
+  const minute = autoMinuteInput.checked ? getClockMinute() : Number(formData.get("minute"));
+
   state.events.push({
     id: crypto.randomUUID(),
-    minute: Number(formData.get("minute")),
+    minute,
     team: formData.get("team"),
     type: formData.get("type"),
     player: formData.get("player").trim(),
@@ -69,8 +91,15 @@ eventForm.addEventListener("submit", (event) => {
 
   state.events.sort((a, b) => a.minute - b.minute);
   eventForm.reset();
+  autoMinuteInput.checked = true;
+  minuteInput.readOnly = true;
+  setEventMinuteFromClock();
   persistAndRender();
 });
+
+clockStartBtn.addEventListener("click", startClock);
+clockPauseBtn.addEventListener("click", pauseClock);
+clockResetBtn.addEventListener("click", resetClock);
 
 resetBtn.addEventListener("click", () => {
   if (!window.confirm("Vuoi davvero cancellare tutti i dati della gara?")) {
@@ -78,7 +107,9 @@ resetBtn.addEventListener("click", () => {
   }
 
   state = structuredClone(defaultState);
+  stopClockInterval();
   persistAndRender();
+  syncClockIntervalWithState();
 });
 
 function addLineupPlayer(event, team, form) {
@@ -112,6 +143,75 @@ function removeEvent(id) {
   persistAndRender();
 }
 
+function getClockMinute() {
+  return Math.floor(state.clock.elapsedSeconds / 60);
+}
+
+function setEventMinuteFromClock() {
+  minuteInput.value = String(getClockMinute());
+}
+
+function startClock() {
+  if (state.clock.running) {
+    return;
+  }
+  state.clock.running = true;
+  state.clock.lastTick = Date.now();
+  syncClockIntervalWithState();
+  persistAndRender();
+}
+
+function pauseClock() {
+  if (!state.clock.running) {
+    return;
+  }
+  applyElapsedFromLastTick();
+  state.clock.running = false;
+  state.clock.lastTick = null;
+  stopClockInterval();
+  persistAndRender();
+}
+
+function resetClock() {
+  state.clock.elapsedSeconds = 0;
+  state.clock.lastTick = state.clock.running ? Date.now() : null;
+  setEventMinuteFromClock();
+  persistAndRender();
+}
+
+function applyElapsedFromLastTick() {
+  if (!state.clock.running || state.clock.lastTick === null) {
+    return;
+  }
+  const now = Date.now();
+  const deltaSeconds = Math.floor((now - state.clock.lastTick) / 1000);
+  if (deltaSeconds > 0) {
+    state.clock.elapsedSeconds += deltaSeconds;
+    state.clock.lastTick += deltaSeconds * 1000;
+  }
+}
+
+function syncClockIntervalWithState() {
+  stopClockInterval();
+  if (state.clock.running) {
+    clockInterval = setInterval(() => {
+      applyElapsedFromLastTick();
+      renderClock();
+      if (autoMinuteInput.checked) {
+        setEventMinuteFromClock();
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }, 250);
+  }
+}
+
+function stopClockInterval() {
+  if (clockInterval) {
+    clearInterval(clockInterval);
+    clockInterval = null;
+  }
+}
+
 function computeStats() {
   const statsByTeam = {
     home: { goals: 0, yellow: 0, red: 0 },
@@ -133,6 +233,18 @@ function render() {
   renderLineup("away", awayLineupList);
   renderEvents();
   renderScoreAndStats();
+  renderClock();
+}
+
+function renderClock() {
+  const minutes = Math.floor(state.clock.elapsedSeconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const seconds = (state.clock.elapsedSeconds % 60).toString().padStart(2, "0");
+  clockDisplay.textContent = `${minutes}:${seconds}`;
+  clockMinute.textContent = `${getClockMinute()}'`;
+  clockStartBtn.disabled = state.clock.running;
+  clockPauseBtn.disabled = !state.clock.running;
 }
 
 function fillMatchForm() {
@@ -197,10 +309,29 @@ function loadState() {
     if (!raw) {
       return structuredClone(defaultState);
     }
-    return { ...structuredClone(defaultState), ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    const merged = {
+      ...structuredClone(defaultState),
+      ...parsed,
+      match: { ...defaultState.match, ...(parsed.match || {}) },
+      lineups: {
+        home: parsed.lineups?.home || [],
+        away: parsed.lineups?.away || [],
+      },
+      clock: { ...defaultState.clock, ...(parsed.clock || {}) },
+    };
+
+    if (merged.clock.running && merged.clock.lastTick === null) {
+      merged.clock.lastTick = Date.now();
+    }
+
+    return merged;
   } catch {
     return structuredClone(defaultState);
   }
 }
 
+minuteInput.readOnly = autoMinuteInput.checked;
+setEventMinuteFromClock();
+syncClockIntervalWithState();
 render();

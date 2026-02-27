@@ -80,6 +80,15 @@ button:hover {
   filter: brightness(0.94);
 }
 
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondary {
+  background: #5f6b8a;
+}
+
 .two-col {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -108,6 +117,45 @@ button:hover {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: #fdfdff;
+}
+
+.match-clock-card {
+  text-align: center;
+}
+
+.clock-wrap {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: center;
+}
+
+.clock-display {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.clock-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.muted {
+  color: #4e5773;
+  margin: 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
 }
 
 .scorecard {
