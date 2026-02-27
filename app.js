@@ -43,8 +43,8 @@ const scoreline = document.querySelector("#scoreline");
 const stats = document.querySelector("#stats");
 const resetBtn = document.querySelector("#reset-btn");
 const lineupItemTemplate = document.querySelector("#lineup-item-template");
-const minuteInput = eventForm.minute;
-const autoMinuteInput = eventForm.autoMinute;
+const minuteInput = eventForm.querySelector('input[name="minute"]');
+const autoMinuteInput = eventForm.querySelector('input[name="autoMinute"]');
 const clockDisplay = document.querySelector("#clock-display");
 const clockMinute = document.querySelector("#clock-minute");
 const clockStartBtn = document.querySelector("#clock-start");
@@ -79,6 +79,9 @@ eventForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const formData = new FormData(eventForm);
   const minute = autoMinuteInput.checked ? getClockMinute() : Number(formData.get("minute"));
+  if (!Number.isFinite(minute)) {
+    return;
+  }
 
   state.events.push({
     id: crypto.randomUUID(),
