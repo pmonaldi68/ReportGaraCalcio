@@ -1,0 +1,161 @@
+:root {
+  color-scheme: light;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --ink: #1a1f36;
+  --accent: #2864ff;
+  --danger: #c83a3a;
+  --border: #d6dceb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+header {
+  background: linear-gradient(120deg, #1a50e5, #2ba7ff);
+  color: white;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+main {
+  width: min(1100px, 92vw);
+  margin: 1.5rem auto 3rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 7%);
+}
+
+h1,
+h2,
+p {
+  margin: 0.3rem 0 0.8rem;
+}
+
+.grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.95rem;
+}
+
+input,
+select,
+button {
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font: inherit;
+}
+
+button {
+  background: var(--accent);
+  color: white;
+  border: 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(0.94);
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.inline-form {
+  display: grid;
+  grid-template-columns: 1fr 90px auto;
+  gap: 0.4rem;
+}
+
+.list {
+  list-style: none;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fdfdff;
+}
+
+.scorecard {
+  text-align: center;
+}
+
+#scoreline {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.stats div {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.5rem;
+  background: #fcfdff;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+
+.small {
+  padding: 0.3rem 0.55rem;
+  font-size: 0.82rem;
+}
+
+.danger {
+  background: var(--danger);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}

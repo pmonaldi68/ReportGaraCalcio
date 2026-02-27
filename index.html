@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Report Gara Calcio</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>⚽ Report Gara Calcio</h1>
+      <p>Gestisci dettagli della gara, formazioni ed eventi in tempo reale.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Dettagli gara</h2>
+        <form id="match-form" class="grid">
+          <label>
+            Squadra casa
+            <input required name="homeTeam" placeholder="Es. Roma" />
+          </label>
+          <label>
+            Squadra ospite
+            <input required name="awayTeam" placeholder="Es. Milan" />
+          </label>
+          <label>
+            Data
+            <input type="date" required name="date" />
+          </label>
+          <label>
+            Orario
+            <input type="time" required name="time" />
+          </label>
+          <label>
+            Stadio
+            <input name="stadium" placeholder="Es. Olimpico" />
+          </label>
+          <label>
+            Arbitro
+            <input name="referee" placeholder="Nome arbitro" />
+          </label>
+          <button type="submit">Salva dettagli gara</button>
+        </form>
+      </section>
+
+      <section class="card two-col">
+        <div>
+          <h2>Formazione casa</h2>
+          <form id="home-lineup-form" class="inline-form">
+            <input name="player" placeholder="Nome giocatore" required />
+            <input name="number" type="number" min="1" max="99" placeholder="N°" required />
+            <button type="submit">Aggiungi</button>
+          </form>
+          <ul id="home-lineup" class="list"></ul>
+        </div>
+        <div>
+          <h2>Formazione ospite</h2>
+          <form id="away-lineup-form" class="inline-form">
+            <input name="player" placeholder="Nome giocatore" required />
+            <input name="number" type="number" min="1" max="99" placeholder="N°" required />
+            <button type="submit">Aggiungi</button>
+          </form>
+          <ul id="away-lineup" class="list"></ul>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Registra evento</h2>
+        <form id="event-form" class="grid">
+          <label>
+            Minuto
+            <input type="number" min="0" max="130" name="minute" required placeholder="Es. 67" />
+          </label>
+          <label>
+            Squadra
+            <select name="team" required>
+              <option value="home">Casa</option>
+              <option value="away">Ospite</option>
+            </select>
+          </label>
+          <label>
+            Tipo evento
+            <select name="type" required>
+              <option value="goal">Gol</option>
+              <option value="yellow">Ammonizione</option>
+              <option value="red">Espulsione</option>
+              <option value="substitution">Sostituzione</option>
+              <option value="penaltyMissed">Rigore sbagliato</option>
+            </select>
+          </label>
+          <label>
+            Giocatore
+            <input name="player" required placeholder="Giocatore coinvolto" />
+          </label>
+          <label>
+            Note
+            <input name="notes" placeholder="Assist, motivo, sostituito..." />
+          </label>
+          <button type="submit">Aggiungi evento</button>
+        </form>
+      </section>
+
+      <section class="card scorecard">
+        <h2>Punteggio & statistiche</h2>
+        <p id="scoreline">Casa 0 - 0 Ospite</p>
+        <div id="stats" class="stats"></div>
+      </section>
+
+      <section class="card">
+        <h2>Cronologia eventi</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Min</th>
+              <th>Squadra</th>
+              <th>Tipo</th>
+              <th>Giocatore</th>
+              <th>Note</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="events-table"></tbody>
+        </table>
+      </section>
+
+      <section class="actions">
+        <button id="reset-btn" class="danger">Reset completo</button>
+      </section>
+    </main>
+
+    <template id="lineup-item-template">
+      <li>
+        <span class="player-info"></span>
+        <button class="small danger" type="button">Rimuovi</button>
+      </li>
+    </template>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
