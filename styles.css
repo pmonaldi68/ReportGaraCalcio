@@ -119,6 +119,36 @@ button:disabled {
   background: #fdfdff;
 }
 
+
+.live-score-card {
+  text-align: center;
+}
+
+.live-scoreboard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  font-weight: 800;
+  font-size: clamp(1.5rem, 2.8vw, 2.4rem);
+  padding: 0.6rem;
+}
+
+.team-name {
+  max-width: 36vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-goals {
+  min-width: 2ch;
+}
+
+.dash {
+  opacity: 0.7;
+}
+
 .match-clock-card {
   text-align: center;
 }

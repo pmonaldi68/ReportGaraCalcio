@@ -50,6 +50,10 @@ const clockMinute = document.querySelector("#clock-minute");
 const clockStartBtn = document.querySelector("#clock-start");
 const clockPauseBtn = document.querySelector("#clock-pause");
 const clockResetBtn = document.querySelector("#clock-reset");
+const liveHomeTeam = document.querySelector("#live-home-team");
+const liveAwayTeam = document.querySelector("#live-away-team");
+const liveHomeGoals = document.querySelector("#live-home-goals");
+const liveAwayGoals = document.querySelector("#live-away-goals");
 
 matchForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -292,6 +296,10 @@ function renderEvents() {
 function renderScoreAndStats() {
   const computed = computeStats();
   scoreline.textContent = `${state.match.homeTeam} ${computed.home.goals} - ${computed.away.goals} ${state.match.awayTeam}`;
+  liveHomeTeam.textContent = state.match.homeTeam;
+  liveAwayTeam.textContent = state.match.awayTeam;
+  liveHomeGoals.textContent = String(computed.home.goals);
+  liveAwayGoals.textContent = String(computed.away.goals);
 
   stats.innerHTML = `
     <div><strong>${state.match.homeTeam}</strong><br/>🟨 ${computed.home.yellow} · 🟥 ${computed.home.red}</div>
