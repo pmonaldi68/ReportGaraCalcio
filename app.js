@@ -1,39 +1,4 @@
 const STORAGE_KEY = "report-gara-calcio-v1";
-const MAX_LINEUP_NUMBER = 20;
-
-const CYNTHIA_PLAYERS = [
-  "BISCONTI CLAUDIO",
-  "CALDARINI DAMIANO",
-  "CAMPOLI DIEGO",
-  "COLAGROSSI MATTEO",
-  "D'AGAPITI PIERPAOLO",
-  "DE BONIS MATTEO",
-  "DE CICCHI ALESSANDRO",
-  "DI VENTURA MARIO",
-  "EVANGELISTI ANDREA",
-  "FALCHETTI MANUEL",
-  "FALCONI FLAVIO",
-  "FRISCIONI LEONARDO",
-  "GIUBBINI LUCA",
-  "GUTIERREZ A. AUGUSTIN",
-  "IPPOLITO RICCARDO",
-  "LESTINI FABIO",
-  "MACELLARI MATTEO",
-  "MARKU AMARILDO",
-  "MATTIA DAVIDE",
-  "MONNI TIZIANO",
-  "MORTAROLI MATTEO",
-  "PEPE MATTEO",
-  "PERI LORENZO",
-  "PRESCIUTTI ANDREA",
-  "RANIERI VALERIO",
-  "SANGERMANO GIORDANO",
-  "SANTI PIERLUIGI",
-  "SERAFINI SIMONE",
-  "TOFA FRANCESCO",
-  "UGOLINI MANUEL",
-];
-
 const defaultState = {
   match: {
     homeTeam: "Casa",
@@ -88,8 +53,6 @@ const liveHomeTeam = document.querySelector("#live-home-team");
 const liveAwayTeam = document.querySelector("#live-away-team");
 const liveHomeGoals = document.querySelector("#live-home-goals");
 const liveAwayGoals = document.querySelector("#live-away-goals");
-const homePlayerSelect = document.querySelector("#home-player-select");
-const lineupNumberSelects = document.querySelectorAll(".number-select");
 
 matchForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -354,26 +317,6 @@ function renderScoreAndStats() {
   `;
 }
 
-function setupLineupSelectors() {
-  homePlayerSelect.innerHTML = '<option value="">Seleziona giocatore CYNTHIA 1920</option>';
-  for (const player of CYNTHIA_PLAYERS) {
-    const option = document.createElement("option");
-    option.value = player;
-    option.textContent = player;
-    homePlayerSelect.append(option);
-  }
-
-  for (const select of lineupNumberSelects) {
-    select.innerHTML = '<option value="">N°</option>';
-    for (let number = 1; number <= MAX_LINEUP_NUMBER; number += 1) {
-      const option = document.createElement("option");
-      option.value = String(number);
-      option.textContent = String(number);
-      select.append(option);
-    }
-  }
-}
-
 function persistAndRender() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   render();
@@ -407,7 +350,6 @@ function loadState() {
   }
 }
 
-setupLineupSelectors();
 minuteInput.readOnly = autoMinuteInput.checked;
 setEventMinuteFromClock();
 syncClockIntervalWithState();
