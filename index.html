@@ -72,8 +72,12 @@
         <div>
           <h2>Formazione casa</h2>
           <form id="home-lineup-form" class="inline-form">
-            <input name="player" placeholder="Nome giocatore" required />
-            <input name="number" type="number" min="1" max="99" placeholder="N°" required />
+            <select id="home-player-select" name="player" required>
+              <option value="">Seleziona giocatore CYNTHIA 1920</option>
+            </select>
+            <select name="number" class="number-select" required>
+              <option value="">N°</option>
+            </select>
             <button type="submit">Aggiungi</button>
           </form>
           <ul id="home-lineup" class="list"></ul>
@@ -82,7 +86,9 @@
           <h2>Formazione ospite</h2>
           <form id="away-lineup-form" class="inline-form">
             <input name="player" placeholder="Nome giocatore" required />
-            <input name="number" type="number" min="1" max="99" placeholder="N°" required />
+            <select name="number" class="number-select" required>
+              <option value="">N°</option>
+            </select>
             <button type="submit">Aggiungi</button>
           </form>
           <ul id="away-lineup" class="list"></ul>
