@@ -11,6 +11,27 @@ const CLOCK_PHASES = {
 
 const REGULAR_HALF_SECONDS = 45 * 60;
 
+const TEAM_NAME_ALIASES = {
+  "A.C.D. ANITRELLA": "ANITRELLA",
+  "A.S.D. ALATRI": "ALATRI",
+  "A.S.D. ATLETICO LARIANO": "ATLETICO LARIANO",
+  "A.S.D. ATLETICO TORRENOVA 1986": "ATLETICO TORRENOVA 1986",
+  "A.S.D. BELMONTE CASTELLO": "BELMONTE CASTELLO",
+  "A.S.D. BOVILLE ERNICA CALCIO": "BOVILLE ERNICA CALCIO",
+  "A.S.D. CITTA DI CEPRANO CALCIO": "CITTA DI CEPRANO CALCIO",
+  "A.S.D. CITTA MONTE S.G. CAMPANO": "CITTA MONTE S.G. CAMPANO",
+  "A.S.D. CYNTHIA 1920": "CYNTHIA 1920",
+  "A.S.D. FOLGORE AMASENO": "FOLGORE AMASENO",
+  "A.S.D. MAGNITUDO FCCG": "MAGNITUDO FCCG",
+  "A.S.D. REAL SAN BASILIO 1960": "REAL SAN BASILIO 1960",
+  "A.S.D. ROCCA PRIORA RDP CALCIO": "ROCCA PRIORA RDP CALCIO",
+  "A.S.D. VIVACE GROTTAFERRATA 1922": "VIVACE GROTTAFERRATA 1922",
+  "ASD P. VIGOR PERCONTI": "VIGOR PERCONTI",
+  "ATLETICO MORENA SSDARL": "ATLETICO MORENA",
+  "S.S.D. POLISPORTIVA DE ROSSI ARL": "POLISPORTIVA DE ROSSI",
+  "U.S.D. POL.CANARINI 1926 RDP": "CANARINI 1926 RDP",
+};
+
 const defaultState = {
   match: {
     homeTeam: "",
@@ -96,8 +117,8 @@ matchForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const formData = new FormData(matchForm);
   state.match = {
-    homeTeam: formData.get("homeTeam").trim(),
-    awayTeam: formData.get("awayTeam").trim(),
+    homeTeam: normalizeTeamName(formData.get("homeTeam")),
+    awayTeam: normalizeTeamName(formData.get("awayTeam")),
     date: formData.get("date"),
     time: formData.get("time"),
     stadium: formData.get("stadium").trim(),
@@ -575,6 +596,17 @@ function getTeamName(side) {
   return side === "home" ? "Casa" : "Ospite";
 }
 
+function normalizeTeamName(teamName) {
+  const raw = String(teamName || "").trim();
+  if (!raw) return "";
+  return TEAM_NAME_ALIASES[raw] || raw;
+}
+
+function normalizeStateTeamNames(targetState) {
+  targetState.match.homeTeam = normalizeTeamName(targetState.match.homeTeam);
+  targetState.match.awayTeam = normalizeTeamName(targetState.match.awayTeam);
+}
+
 function renderScoreAndStats() {
   const computed = computeStats();
   const homeTeamName = getTeamName("home");
@@ -607,7 +639,7 @@ function applyCurrentDateTimeDefaults(targetState) {
 }
 
 function isCynthiaAwaySelected() {
-  return state.match.awayTeam === "A.S.D. CYNTHIA 1920";
+  return state.match.awayTeam === "CYNTHIA 1920";
 }
 
 function syncAwayPlayerMode() {
@@ -687,7 +719,15 @@ function loadArchive() {
     const raw = localStorage.getItem(ARCHIVE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.map((item) => {
+      const nextItem = structuredClone(item);
+      if (nextItem?.state?.match) {
+        normalizeStateTeamNames(nextItem.state);
+      }
+      return nextItem;
+    });
   } catch {
     return [];
   }
@@ -709,6 +749,7 @@ function loadArchivedMatch(id) {
   if (!found) return;
   stopClockInterval();
   state = structuredClone(found.state);
+  normalizeStateTeamNames(state);
   state.clock.running = false;
   state.clock.lastTick = null;
   persistAndRender();
@@ -803,6 +844,8 @@ function loadState() {
     if (merged.clock.running && merged.clock.lastTick === null) {
       merged.clock.lastTick = Date.now();
     }
+
+    normalizeStateTeamNames(merged);
 
     if (merged.clock.phase === CLOCK_PHASES.finished) {
       merged.clock.running = false;
