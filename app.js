@@ -1,6 +1,6 @@
 const STORAGE_KEY = "report-gara-calcio-v1";
 const ARCHIVE_KEY = "report-gara-calcio-archive-v1";
-const MAX_LINEUP_NUMBER = 20;
+const MAX_LINEUP_NUMBER = 99;
 const CLOCK_PHASES = {
   firstHalf: "firstHalf",
   firstHalfStoppage: "firstHalfStoppage",
@@ -22,6 +22,10 @@ const defaultState = {
   lineups: {
     home: [],
     away: [],
+  },
+  captains: {
+    home: { captain: "", viceCaptain: "" },
+    away: { captain: "", viceCaptain: "" },
   },
   clock: {
     elapsedSeconds: 0,
@@ -50,6 +54,8 @@ const awayLineupForm = document.querySelector("#away-lineup-form");
 const eventForm = document.querySelector("#event-form");
 const homeLineupList = document.querySelector("#home-lineup");
 const awayLineupList = document.querySelector("#away-lineup");
+const homeLineupTitle = document.querySelector("#home-lineup-title");
+const awayLineupTitle = document.querySelector("#away-lineup-title");
 const eventsTable = document.querySelector("#events-table");
 const scoreline = document.querySelector("#scoreline");
 const stats = document.querySelector("#stats");
@@ -68,8 +74,8 @@ const liveHomeTeam = document.querySelector("#live-home-team");
 const liveAwayTeam = document.querySelector("#live-away-team");
 const liveHomeGoals = document.querySelector("#live-home-goals");
 const liveAwayGoals = document.querySelector("#live-away-goals");
-const homeNumberInput = homeLineupForm.querySelector('input[name="number"]');
-const awayNumberInput = awayLineupForm.querySelector('input[name="number"]');
+const homeNumberInput = homeLineupForm.querySelector('[name="number"]');
+const awayNumberInput = awayLineupForm.querySelector('[name="number"]');
 const awayPlayerInput = document.querySelector("#away-player-input");
 const awayPlayerSelect = document.querySelector("#away-player-select");
 const eventTypeSelect = eventForm.querySelector('select[name="type"]');
@@ -77,6 +83,11 @@ const eventPlayerLabel = document.querySelector("#event-player-label");
 const eventPlayerLabelText = document.querySelector("#event-player-label-text");
 const subInLabel = document.querySelector("#sub-in-label");
 const subInInput = eventForm.querySelector('select[name="subInNumber"]');
+const eventPlayerNumberInput = eventForm.querySelector('select[name="playerNumber"]');
+const homeCaptainSelect = document.querySelector("#home-captain-select");
+const homeViceCaptainSelect = document.querySelector("#home-vice-captain-select");
+const awayCaptainSelect = document.querySelector("#away-captain-select");
+const awayViceCaptainSelect = document.querySelector("#away-vice-captain-select");
 const archiveSaveBtn = document.querySelector("#archive-save-btn");
 const exportPdfBtn = document.querySelector("#export-pdf-btn");
 const archiveList = document.querySelector("#archive-list");
@@ -106,6 +117,10 @@ autoMinuteInput.addEventListener("change", () => {
 });
 
 eventTypeSelect.addEventListener("change", updateSubstitutionFields);
+homeCaptainSelect.addEventListener("change", () => setLeader("home", "captain", homeCaptainSelect.value));
+homeViceCaptainSelect.addEventListener("change", () => setLeader("home", "viceCaptain", homeViceCaptainSelect.value));
+awayCaptainSelect.addEventListener("change", () => setLeader("away", "captain", awayCaptainSelect.value));
+awayViceCaptainSelect.addEventListener("change", () => setLeader("away", "viceCaptain", awayViceCaptainSelect.value));
 
 eventForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -196,6 +211,7 @@ function addLineupPlayer(event, team, form) {
   });
 
   state.lineups[team].sort((a, b) => a.number - b.number);
+  syncTeamLeadersWithLineup(team);
   resetLineupPlayerField(team);
   persistAndRender();
   setNextLineupNumber(team);
@@ -204,6 +220,7 @@ function addLineupPlayer(event, team, form) {
 
 function removeLineupPlayer(team, id) {
   state.lineups[team] = state.lineups[team].filter((player) => player.id !== id);
+  syncTeamLeadersWithLineup(team);
   persistAndRender();
   setNextLineupNumber(team);
   focusLineupPlayerField(team);
@@ -226,6 +243,93 @@ function updateSubstitutionFields() {
   if (!isSubstitution) {
     subInInput.value = "";
   }
+}
+
+function populateNumberSelect(selectElement, placeholderText) {
+  const previousValue = selectElement.value;
+  selectElement.innerHTML = "";
+
+  const placeholderOption = document.createElement("option");
+  placeholderOption.value = "";
+  placeholderOption.textContent = placeholderText;
+  selectElement.append(placeholderOption);
+
+  for (let number = 1; number <= MAX_LINEUP_NUMBER; number += 1) {
+    const option = document.createElement("option");
+    option.value = String(number);
+    option.textContent = String(number);
+    selectElement.append(option);
+  }
+
+  selectElement.value = previousValue;
+}
+
+function getLineupHeading(side) {
+  const teamName = getTeamName(side);
+  return `Formazione ${teamName}`;
+}
+
+function getLineupPlayerLabel(player) {
+  return `#${player.number} ${player.player}`;
+}
+
+function setLeader(team, role, value) {
+  const selectedValue = String(value || "");
+  const otherRole = role === "captain" ? "viceCaptain" : "captain";
+
+  if (selectedValue && state.captains[team][otherRole] === selectedValue) {
+    window.alert("Capitano e vice capitano devono essere diversi.");
+    const targetSelect = team === "home"
+      ? (role === "captain" ? homeCaptainSelect : homeViceCaptainSelect)
+      : (role === "captain" ? awayCaptainSelect : awayViceCaptainSelect);
+    targetSelect.value = state.captains[team][role] || "";
+    return;
+  }
+
+  state.captains[team][role] = selectedValue;
+  persistAndRender();
+}
+
+function syncTeamLeadersWithLineup(team) {
+  const existingNumbers = new Set(state.lineups[team].map((player) => String(player.number)));
+  if (!existingNumbers.has(state.captains[team].captain)) {
+    state.captains[team].captain = "";
+  }
+  if (!existingNumbers.has(state.captains[team].viceCaptain)) {
+    state.captains[team].viceCaptain = "";
+  }
+}
+
+function populateLeaderSelect(team, selectElement, roleLabel, selectedValue) {
+  const currentSelected = String(selectedValue || "");
+  selectElement.innerHTML = "";
+
+  const empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = `Seleziona ${roleLabel}`;
+  selectElement.append(empty);
+
+  for (const player of state.lineups[team]) {
+    const option = document.createElement("option");
+    option.value = String(player.number);
+    option.textContent = getLineupPlayerLabel(player);
+    selectElement.append(option);
+  }
+
+  selectElement.value = currentSelected;
+}
+
+function renderLineupMetadata() {
+  homeLineupTitle.textContent = getLineupHeading("home");
+  awayLineupTitle.textContent = getLineupHeading("away");
+
+  syncTeamLeadersWithLineup("home");
+  syncTeamLeadersWithLineup("away");
+
+  populateLeaderSelect("home", homeCaptainSelect, "capitano", state.captains.home.captain);
+  populateLeaderSelect("home", homeViceCaptainSelect, "vice capitano", state.captains.home.viceCaptain);
+  populateLeaderSelect("away", awayCaptainSelect, "capitano", state.captains.away.captain);
+  populateLeaderSelect("away", awayViceCaptainSelect, "vice capitano", state.captains.away.viceCaptain);
 }
 
 function getPhaseElapsedSeconds() {
@@ -390,6 +494,7 @@ function computeStats() {
 
 function render() {
   fillMatchForm();
+  renderLineupMetadata();
   renderLineup("home", homeLineupList);
   renderLineup("away", awayLineupList);
   renderEvents();
@@ -558,13 +663,13 @@ function getNextLineupNumber(team) {
       return number;
     }
   }
-  return MAX_LINEUP_NUMBER;
+  return null;
 }
 
 function setNextLineupNumber(team) {
   const next = getNextLineupNumber(team);
   const targetInput = team === "home" ? homeNumberInput : awayNumberInput;
-  targetInput.value = String(next);
+  targetInput.value = next === null ? "" : String(next);
 }
 
 function syncLineupNumberInputs() {
@@ -678,6 +783,10 @@ function loadState() {
         home: parsed.lineups?.home || [],
         away: parsed.lineups?.away || [],
       },
+      captains: {
+        home: { ...defaultState.captains.home, ...(parsed.captains?.home || {}) },
+        away: { ...defaultState.captains.away, ...(parsed.captains?.away || {}) },
+      },
       clock: { ...defaultState.clock, ...(parsed.clock || {}) },
     };
 
@@ -706,6 +815,11 @@ function loadState() {
     return structuredClone(defaultState);
   }
 }
+
+populateNumberSelect(homeNumberInput, "N° maglia");
+populateNumberSelect(awayNumberInput, "N° maglia");
+populateNumberSelect(eventPlayerNumberInput, "Seleziona numero");
+populateNumberSelect(subInInput, "Seleziona numero");
 
 applyCurrentDateTimeDefaults(state);
 minuteInput.readOnly = autoMinuteInput.checked;

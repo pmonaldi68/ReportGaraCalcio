@@ -128,16 +128,26 @@
 
       <section class="card two-col">
         <div>
-          <h2>Formazione casa</h2>
+          <h2 id="home-lineup-title">Formazione casa</h2>
           <form id="home-lineup-form" class="inline-form">
             <input name="player" placeholder="Nome giocatore" required />
-            <input name="number" type="number" min="1" max="20" required readonly />
+            <select name="number" required aria-label="Numero maglia casa"></select>
             <button type="submit">Aggiungi</button>
           </form>
           <ul id="home-lineup" class="list"></ul>
+          <div class="leaders-grid">
+            <label>
+              Capitano
+              <select id="home-captain-select"></select>
+            </label>
+            <label>
+              Vice capitano
+              <select id="home-vice-captain-select"></select>
+            </label>
+          </div>
         </div>
         <div>
-          <h2>Formazione ospite</h2>
+          <h2 id="away-lineup-title">Formazione ospite</h2>
           <form id="away-lineup-form" class="inline-form">
             <input id="away-player-input" name="player" placeholder="Nome giocatore" required />
             <select id="away-player-select" name="playerSelect" hidden>
@@ -173,10 +183,20 @@
               <option value="TOFA FRANCESCO">TOFA FRANCESCO</option>
               <option value="UGOLINI MANUEL">UGOLINI MANUEL</option>
             </select>
-            <input name="number" type="number" min="1" max="20" required readonly />
+            <select name="number" required aria-label="Numero maglia ospite"></select>
             <button type="submit">Aggiungi</button>
           </form>
           <ul id="away-lineup" class="list"></ul>
+          <div class="leaders-grid">
+            <label>
+              Capitano
+              <select id="away-captain-select"></select>
+            </label>
+            <label>
+              Vice capitano
+              <select id="away-vice-captain-select"></select>
+            </label>
+          </div>
         </div>
       </section>
 
@@ -210,54 +230,14 @@
           </label>
           <label id="event-player-label">
             <span id="event-player-label-text">N° calciatore</span>
-            <select name="playerNumber" required>
+            <select name="playerNumber" id="event-player-number" required>
               <option value="">Seleziona numero</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-              <option value="13">13</option>
-              <option value="14">14</option>
-              <option value="15">15</option>
-              <option value="16">16</option>
-              <option value="17">17</option>
-              <option value="18">18</option>
-              <option value="19">19</option>
-              <option value="20">20</option>
             </select>
           </label>
           <label id="sub-in-label" hidden>
             N° calciatore entra
-            <select name="subInNumber">
+            <select name="subInNumber" id="event-sub-in-number">
               <option value="">Seleziona numero</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-              <option value="13">13</option>
-              <option value="14">14</option>
-              <option value="15">15</option>
-              <option value="16">16</option>
-              <option value="17">17</option>
-              <option value="18">18</option>
-              <option value="19">19</option>
-              <option value="20">20</option>
             </select>
           </label>
           <label>
