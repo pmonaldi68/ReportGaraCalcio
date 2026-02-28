@@ -40,10 +40,6 @@
             Arbitro
             <input name="referee" placeholder="Nome arbitro" />
           </label>
-          <label>
-            Possesso casa (%)
-            <input type="number" min="0" max="100" name="homePossession" placeholder="50" />
-          </label>
           <button type="submit">Salva dettagli gara</button>
         </form>
       </section>
@@ -57,82 +53,6 @@
           <span id="live-away-goals" class="team-goals">0</span>
           <span id="live-away-team" class="team-name">Ospite</span>
         </div>
-      </section>
-
-      <section class="match-stats">
-        <div class="stats-header">Match Stats</div>
-
-        <section class="stats-block">
-          <h3>Possession</h3>
-          <div class="team-row">
-            <div class="row-top">
-              <p id="possession-home-label">Casa</p>
-              <p id="possession-home-value">50%</p>
-            </div>
-            <div class="bar-track"><div id="possession-home-bar" class="bar-fill" style="width: 50%"></div></div>
-          </div>
-          <div class="team-row">
-            <div class="row-top">
-              <p id="possession-away-label">Ospite</p>
-              <p id="possession-away-value">50%</p>
-            </div>
-            <div class="bar-track"><div id="possession-away-bar" class="bar-fill" style="width: 50%"></div></div>
-          </div>
-        </section>
-
-        <section class="stats-block">
-          <h3>Shots on Goal</h3>
-          <div class="stats-grid two">
-            <article class="stat-card">
-              <p id="shots-home-label">Casa</p>
-              <p id="shots-home-value" class="big">0</p>
-            </article>
-            <article class="stat-card">
-              <p id="shots-away-label">Ospite</p>
-              <p id="shots-away-value" class="big">0</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="stats-block">
-          <h3>Fouls</h3>
-          <div class="stats-grid two">
-            <article class="stat-card">
-              <p id="fouls-home-label">Casa</p>
-              <p id="fouls-home-value" class="big">0</p>
-            </article>
-            <article class="stat-card">
-              <p id="fouls-away-label">Ospite</p>
-              <p id="fouls-away-value" class="big">0</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="stats-block">
-          <h3>Cards</h3>
-          <div class="stats-grid two">
-            <article class="stat-card">
-              <p id="cards-home-label">Casa</p>
-              <div class="cards-line">
-                <p id="cards-home-total" class="big">0</p>
-                <div class="card-badges">
-                  <span id="cards-home-yellow" class="badge yellow"></span>
-                  <span id="cards-home-red" class="badge red"></span>
-                </div>
-              </div>
-            </article>
-            <article class="stat-card">
-              <p id="cards-away-label">Ospite</p>
-              <div class="cards-line">
-                <p id="cards-away-total" class="big">0</p>
-                <div class="card-badges">
-                  <span id="cards-away-yellow" class="badge yellow"></span>
-                  <span id="cards-away-red" class="badge red"></span>
-                </div>
-              </div>
-            </article>
-          </div>
-        </section>
       </section>
 
       <section class="card match-clock-card">
@@ -191,8 +111,6 @@
             Tipo evento
             <select name="type" required>
               <option value="goal">Gol</option>
-              <option value="shotOnTarget">Tiro in porta</option>
-              <option value="foul">Fallo</option>
               <option value="yellow">Ammonizione</option>
               <option value="red">Espulsione</option>
               <option value="substitution">Sostituzione</option>
