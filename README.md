@@ -4,8 +4,9 @@ Web app semplice (HTML/CSS/JS) per gestire una gara di calcio:
 
 - dettagli gara (squadre da elenco campionato, data, orario, stadio, arbitro)
 - formazioni casa/ospite
-- selezione rapida giocatori CYNTHIA 1920 per la formazione casa
-- numerazione formazione a selezione da 1 a 20
+- selezione giocatori CYNTHIA 1920 in formazione ospite solo quando ospite = CYNTHIA
+- negli altri casi inserimento giocatore manuale
+- numerazione automatica formazione da 1 a 20 (incrementale)
 - eventi partita (gol, ammonizioni, espulsioni, sostituzioni, rigori sbagliati)
 - cronometro gara con minuto automatico per gli eventi
 - cronologia eventi con eliminazione

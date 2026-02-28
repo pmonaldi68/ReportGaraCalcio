@@ -112,39 +112,7 @@
         <div>
           <h2>Formazione casa</h2>
           <form id="home-lineup-form" class="inline-form">
-            <select id="home-player-select" name="player" required>
-              <option value="">Seleziona giocatore CYNTHIA 1920</option>
-              <option value="BISCONTI CLAUDIO">BISCONTI CLAUDIO</option>
-              <option value="CALDARINI DAMIANO">CALDARINI DAMIANO</option>
-              <option value="CAMPOLI DIEGO">CAMPOLI DIEGO</option>
-              <option value="COLAGROSSI MATTEO">COLAGROSSI MATTEO</option>
-              <option value="D'AGAPITI PIERPAOLO">D'AGAPITI PIERPAOLO</option>
-              <option value="DE BONIS MATTEO">DE BONIS MATTEO</option>
-              <option value="DE CICCHI ALESSANDRO">DE CICCHI ALESSANDRO</option>
-              <option value="DI VENTURA MARIO">DI VENTURA MARIO</option>
-              <option value="EVANGELISTI ANDREA">EVANGELISTI ANDREA</option>
-              <option value="FALCHETTI MANUEL">FALCHETTI MANUEL</option>
-              <option value="FALCONI FLAVIO">FALCONI FLAVIO</option>
-              <option value="FRISCIONI LEONARDO">FRISCIONI LEONARDO</option>
-              <option value="GIUBBINI LUCA">GIUBBINI LUCA</option>
-              <option value="GUTIERREZ A. AUGUSTIN">GUTIERREZ A. AUGUSTIN</option>
-              <option value="IPPOLITO RICCARDO">IPPOLITO RICCARDO</option>
-              <option value="LESTINI FABIO">LESTINI FABIO</option>
-              <option value="MACELLARI MATTEO">MACELLARI MATTEO</option>
-              <option value="MARKU AMARILDO">MARKU AMARILDO</option>
-              <option value="MATTIA DAVIDE">MATTIA DAVIDE</option>
-              <option value="MONNI TIZIANO">MONNI TIZIANO</option>
-              <option value="MORTAROLI MATTEO">MORTAROLI MATTEO</option>
-              <option value="PEPE MATTEO">PEPE MATTEO</option>
-              <option value="PERI LORENZO">PERI LORENZO</option>
-              <option value="PRESCIUTTI ANDREA">PRESCIUTTI ANDREA</option>
-              <option value="RANIERI VALERIO">RANIERI VALERIO</option>
-              <option value="SANGERMANO GIORDANO">SANGERMANO GIORDANO</option>
-              <option value="SANTI PIERLUIGI">SANTI PIERLUIGI</option>
-              <option value="SERAFINI SIMONE">SERAFINI SIMONE</option>
-              <option value="TOFA FRANCESCO">TOFA FRANCESCO</option>
-              <option value="UGOLINI MANUEL">UGOLINI MANUEL</option>
-            </select>
+            <input name="player" placeholder="Nome giocatore" required />
             <input name="number" type="number" min="1" max="20" required readonly />
             <button type="submit">Aggiungi</button>
           </form>
@@ -153,7 +121,8 @@
         <div>
           <h2>Formazione ospite</h2>
           <form id="away-lineup-form" class="inline-form">
-            <select id="away-player-select" name="player" required>
+            <input id="away-player-input" name="player" placeholder="Nome giocatore" required />
+            <select id="away-player-select" name="playerSelect" hidden>
               <option value="">Seleziona giocatore CYNTHIA 1920</option>
               <option value="BISCONTI CLAUDIO">BISCONTI CLAUDIO</option>
               <option value="CALDARINI DAMIANO">CALDARINI DAMIANO</option>

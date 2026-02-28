@@ -56,6 +56,8 @@ const liveHomeGoals = document.querySelector("#live-home-goals");
 const liveAwayGoals = document.querySelector("#live-away-goals");
 const homeNumberInput = homeLineupForm.querySelector('input[name="number"]');
 const awayNumberInput = awayLineupForm.querySelector('input[name="number"]');
+const awayPlayerInput = document.querySelector("#away-player-input");
+const awayPlayerSelect = document.querySelector("#away-player-select");
 
 matchForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -69,6 +71,7 @@ matchForm.addEventListener("submit", (event) => {
     referee: formData.get("referee").trim(),
   };
   persistAndRender();
+  syncAwayPlayerMode();
 });
 
 homeLineupForm.addEventListener("submit", (event) => addLineupPlayer(event, "home", homeLineupForm));
@@ -116,16 +119,18 @@ resetBtn.addEventListener("click", () => {
   }
 
   state = structuredClone(defaultState);
+  applyCurrentDateTimeDefaults(state);
   stopClockInterval();
   persistAndRender();
   syncClockIntervalWithState();
+  syncLineupNumberInputs();
+  syncAwayPlayerMode();
 });
 
 function addLineupPlayer(event, team, form) {
   event.preventDefault();
   const formData = new FormData(form);
-  const rawPlayer = formData.get("player");
-  const player = typeof rawPlayer === "string" ? rawPlayer.trim() : "";
+  const player = getSelectedLineupPlayer(team, formData);
   const number = Number(formData.get("number"));
 
   if (!player || Number.isNaN(number) || number < 1 || number > MAX_LINEUP_NUMBER) {
@@ -147,7 +152,7 @@ function addLineupPlayer(event, team, form) {
   });
 
   state.lineups[team].sort((a, b) => a.number - b.number);
-  form.player.selectedIndex = 0;
+  resetLineupPlayerField(team);
   persistAndRender();
   setNextLineupNumber(team);
 }
@@ -330,13 +335,63 @@ function renderScoreAndStats() {
   `;
 }
 
-function getNextLineupNumber(team) {
-  if (!state.lineups[team].length) {
-    return 1;
+function getCurrentDateTime() {
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10);
+  const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  return { date, time };
+}
+
+function applyCurrentDateTimeDefaults(targetState) {
+  const current = getCurrentDateTime();
+  if (!targetState.match.date) targetState.match.date = current.date;
+  if (!targetState.match.time) targetState.match.time = current.time;
+}
+
+function isCynthiaAwaySelected() {
+  return state.match.awayTeam === "A.S.D. CYNTHIA 1920";
+}
+
+function syncAwayPlayerMode() {
+  const useSelect = isCynthiaAwaySelected();
+  awayPlayerInput.hidden = useSelect;
+  awayPlayerInput.disabled = useSelect;
+  awayPlayerInput.required = !useSelect;
+
+  awayPlayerSelect.hidden = !useSelect;
+  awayPlayerSelect.disabled = !useSelect;
+  awayPlayerSelect.required = useSelect;
+}
+
+function getSelectedLineupPlayer(team, formData) {
+  if (team === "away" && isCynthiaAwaySelected()) {
+    return String(formData.get("playerSelect") || "").trim();
+  }
+  return String(formData.get("player") || "").trim();
+}
+
+function resetLineupPlayerField(team) {
+  if (team === "away" && isCynthiaAwaySelected()) {
+    awayPlayerSelect.selectedIndex = 0;
+    return;
   }
 
-  const maxAssigned = Math.max(...state.lineups[team].map((player) => player.number));
-  return Math.min(MAX_LINEUP_NUMBER, maxAssigned + 1);
+  if (team === "away") {
+    awayPlayerInput.value = "";
+    return;
+  }
+
+  homeLineupForm.player.value = "";
+}
+
+function getNextLineupNumber(team) {
+  const used = new Set(state.lineups[team].map((player) => player.number));
+  for (let number = 1; number <= MAX_LINEUP_NUMBER; number += 1) {
+    if (!used.has(number)) {
+      return number;
+    }
+  }
+  return MAX_LINEUP_NUMBER;
 }
 
 function setNextLineupNumber(team) {
@@ -383,8 +438,10 @@ function loadState() {
   }
 }
 
+applyCurrentDateTimeDefaults(state);
 minuteInput.readOnly = autoMinuteInput.checked;
 setEventMinuteFromClock();
 syncClockIntervalWithState();
 syncLineupNumberInputs();
+syncAwayPlayerMode();
 render();
