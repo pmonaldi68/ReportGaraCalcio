@@ -210,9 +210,17 @@
               <option value="penaltyMissed">Rigore sbagliato</option>
             </select>
           </label>
-          <label>
+          <label id="event-player-label">
             Giocatore
             <input name="player" required placeholder="Giocatore coinvolto" />
+          </label>
+          <label id="sub-out-label" hidden>
+            Esce
+            <input name="subOut" placeholder="Giocatore che esce" />
+          </label>
+          <label id="sub-in-label" hidden>
+            Entra
+            <input name="subIn" placeholder="Giocatore che entra" />
           </label>
           <label>
             Note

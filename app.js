@@ -58,6 +58,12 @@ const homeNumberInput = homeLineupForm.querySelector('input[name="number"]');
 const awayNumberInput = awayLineupForm.querySelector('input[name="number"]');
 const awayPlayerInput = document.querySelector("#away-player-input");
 const awayPlayerSelect = document.querySelector("#away-player-select");
+const eventTypeSelect = eventForm.querySelector('select[name="type"]');
+const eventPlayerLabel = document.querySelector("#event-player-label");
+const subOutLabel = document.querySelector("#sub-out-label");
+const subInLabel = document.querySelector("#sub-in-label");
+const subOutInput = eventForm.querySelector('input[name="subOut"]');
+const subInInput = eventForm.querySelector('input[name="subIn"]');
 
 matchForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -84,6 +90,8 @@ autoMinuteInput.addEventListener("change", () => {
   }
 });
 
+eventTypeSelect.addEventListener("change", updateSubstitutionFields);
+
 eventForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const formData = new FormData(eventForm);
@@ -92,13 +100,28 @@ eventForm.addEventListener("submit", (event) => {
     return;
   }
 
+  const type = formData.get("type");
+  const baseNotes = formData.get("notes").trim();
+  let player = formData.get("player").trim();
+  let notes = baseNotes;
+
+  if (type === "substitution") {
+    const subOut = formData.get("subOut").trim();
+    const subIn = formData.get("subIn").trim();
+    if (!subOut || !subIn) {
+      return;
+    }
+    player = subOut;
+    notes = `Entra: ${subIn}${baseNotes ? ` · ${baseNotes}` : ""}`;
+  }
+
   state.events.push({
     id: crypto.randomUUID(),
     minute,
     team: formData.get("team"),
-    type: formData.get("type"),
-    player: formData.get("player").trim(),
-    notes: formData.get("notes").trim(),
+    type,
+    player,
+    notes,
   });
 
   state.events.sort((a, b) => a.minute - b.minute);
@@ -106,6 +129,7 @@ eventForm.addEventListener("submit", (event) => {
   autoMinuteInput.checked = true;
   minuteInput.readOnly = true;
   setEventMinuteFromClock();
+  updateSubstitutionFields();
   persistAndRender();
 });
 
@@ -166,6 +190,22 @@ function removeLineupPlayer(team, id) {
 function removeEvent(id) {
   state.events = state.events.filter((event) => event.id !== id);
   persistAndRender();
+}
+
+function updateSubstitutionFields() {
+  const isSubstitution = eventTypeSelect.value === "substitution";
+  eventPlayerLabel.hidden = isSubstitution;
+  eventForm.player.required = !isSubstitution;
+
+  subOutLabel.hidden = !isSubstitution;
+  subInLabel.hidden = !isSubstitution;
+  subOutInput.required = isSubstitution;
+  subInInput.required = isSubstitution;
+
+  if (!isSubstitution) {
+    subOutInput.value = "";
+    subInInput.value = "";
+  }
 }
 
 function getClockMinute() {
@@ -444,4 +484,5 @@ setEventMinuteFromClock();
 syncClockIntervalWithState();
 syncLineupNumberInputs();
 syncAwayPlayerMode();
+updateSubstitutionFields();
 render();
