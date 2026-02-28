@@ -176,12 +176,14 @@ function addLineupPlayer(event, team, form) {
   resetLineupPlayerField(team);
   persistAndRender();
   setNextLineupNumber(team);
+  focusLineupPlayerField(team);
 }
 
 function removeLineupPlayer(team, id) {
   state.lineups[team] = state.lineups[team].filter((player) => player.id !== id);
   persistAndRender();
   setNextLineupNumber(team);
+  focusLineupPlayerField(team);
 }
 
 function removeEvent(id) {
@@ -418,6 +420,20 @@ function resetLineupPlayerField(team) {
   }
 
   homeLineupForm.player.value = "";
+}
+
+function focusLineupPlayerField(team) {
+  if (team === "away" && isCynthiaAwaySelected()) {
+    awayPlayerSelect.focus();
+    return;
+  }
+
+  if (team === "away") {
+    awayPlayerInput.focus();
+    return;
+  }
+
+  homeLineupForm.player.focus();
 }
 
 function getNextLineupNumber(team) {
