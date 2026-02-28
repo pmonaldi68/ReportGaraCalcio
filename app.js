@@ -60,9 +60,8 @@ const awayPlayerInput = document.querySelector("#away-player-input");
 const awayPlayerSelect = document.querySelector("#away-player-select");
 const eventTypeSelect = eventForm.querySelector('select[name="type"]');
 const eventPlayerLabel = document.querySelector("#event-player-label");
-const subOutLabel = document.querySelector("#sub-out-label");
+const eventPlayerLabelText = document.querySelector("#event-player-label-text");
 const subInLabel = document.querySelector("#sub-in-label");
-const subOutInput = eventForm.querySelector('input[name="subOut"]');
 const subInInput = eventForm.querySelector('input[name="subIn"]');
 
 matchForm.addEventListener("submit", (event) => {
@@ -106,12 +105,10 @@ eventForm.addEventListener("submit", (event) => {
   let notes = baseNotes;
 
   if (type === "substitution") {
-    const subOut = formData.get("subOut").trim();
     const subIn = formData.get("subIn").trim();
-    if (!subOut || !subIn) {
+    if (!player || !subIn) {
       return;
     }
-    player = subOut;
     notes = `Entra: ${subIn}${baseNotes ? ` · ${baseNotes}` : ""}`;
   }
 
@@ -194,16 +191,15 @@ function removeEvent(id) {
 
 function updateSubstitutionFields() {
   const isSubstitution = eventTypeSelect.value === "substitution";
-  eventPlayerLabel.hidden = isSubstitution;
-  eventForm.player.required = !isSubstitution;
 
-  subOutLabel.hidden = !isSubstitution;
+  eventPlayerLabelText.textContent = isSubstitution ? "Giocatore esce" : "Giocatore";
+  eventForm.player.placeholder = isSubstitution ? "Giocatore che esce" : "Giocatore coinvolto";
+  eventForm.player.required = true;
+
   subInLabel.hidden = !isSubstitution;
-  subOutInput.required = isSubstitution;
   subInInput.required = isSubstitution;
 
   if (!isSubstitution) {
-    subOutInput.value = "";
     subInInput.value = "";
   }
 }
