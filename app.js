@@ -1,4 +1,5 @@
 const STORAGE_KEY = "report-gara-calcio-v1";
+const ARCHIVE_KEY = "report-gara-calcio-archive-v1";
 const MAX_LINEUP_NUMBER = 20;
 const defaultState = {
   match: {
@@ -30,6 +31,7 @@ const eventLabels = {
 };
 
 let state = loadState();
+let archiveState = loadArchive();
 let clockInterval = null;
 
 const matchForm = document.querySelector("#match-form");
@@ -62,7 +64,10 @@ const eventTypeSelect = eventForm.querySelector('select[name="type"]');
 const eventPlayerLabel = document.querySelector("#event-player-label");
 const eventPlayerLabelText = document.querySelector("#event-player-label-text");
 const subInLabel = document.querySelector("#sub-in-label");
-const subInInput = eventForm.querySelector('input[name="subIn"]');
+const subInInput = eventForm.querySelector('input[name="subInNumber"]');
+const archiveSaveBtn = document.querySelector("#archive-save-btn");
+const exportPdfBtn = document.querySelector("#export-pdf-btn");
+const archiveList = document.querySelector("#archive-list");
 
 matchForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -101,15 +106,19 @@ eventForm.addEventListener("submit", (event) => {
 
   const type = formData.get("type");
   const baseNotes = formData.get("notes").trim();
-  let player = formData.get("player").trim();
+  let playerNumber = Number(formData.get("playerNumber"));
   let notes = baseNotes;
 
+  if (!Number.isFinite(playerNumber)) {
+    return;
+  }
+
   if (type === "substitution") {
-    const subIn = formData.get("subIn").trim();
-    if (!player || !subIn) {
+    const subInNumber = Number(formData.get("subInNumber"));
+    if (!Number.isFinite(playerNumber) || !Number.isFinite(subInNumber)) {
       return;
     }
-    notes = `Entra: ${subIn}${baseNotes ? ` · ${baseNotes}` : ""}`;
+    notes = `Entra n° ${subInNumber}${baseNotes ? ` · ${baseNotes}` : ""}`;
   }
 
   state.events.push({
@@ -117,7 +126,7 @@ eventForm.addEventListener("submit", (event) => {
     minute,
     team: formData.get("team"),
     type,
-    player,
+    playerNumber,
     notes,
   });
 
@@ -133,6 +142,8 @@ eventForm.addEventListener("submit", (event) => {
 clockStartBtn.addEventListener("click", startClock);
 clockPauseBtn.addEventListener("click", pauseClock);
 clockResetBtn.addEventListener("click", resetClock);
+archiveSaveBtn.addEventListener("click", saveCurrentMatchToArchive);
+exportPdfBtn.addEventListener("click", exportOrSharePdf);
 
 resetBtn.addEventListener("click", () => {
   if (!window.confirm("Vuoi davvero cancellare tutti i dati della gara?")) {
@@ -194,9 +205,9 @@ function removeEvent(id) {
 function updateSubstitutionFields() {
   const isSubstitution = eventTypeSelect.value === "substitution";
 
-  eventPlayerLabelText.textContent = isSubstitution ? "Giocatore esce" : "Giocatore";
-  eventForm.player.placeholder = isSubstitution ? "Giocatore che esce" : "Giocatore coinvolto";
-  eventForm.player.required = true;
+  eventPlayerLabelText.textContent = isSubstitution ? "N° calciatore esce" : "N° calciatore";
+  eventForm.playerNumber.placeholder = isSubstitution ? "Es. 10" : "Es. 10";
+  eventForm.playerNumber.required = true;
 
   subInLabel.hidden = !isSubstitution;
   subInInput.required = isSubstitution;
@@ -297,6 +308,7 @@ function render() {
   renderEvents();
   renderScoreAndStats();
   renderClock();
+  renderArchiveList();
 }
 
 function renderClock() {
@@ -340,7 +352,7 @@ function renderEvents() {
       <td>${event.minute}'</td>
       <td>${event.team === "home" ? getTeamName("home") : getTeamName("away")}</td>
       <td>${eventLabels[event.type]}</td>
-      <td>${event.player}</td>
+      <td>${event.playerNumber ?? event.player ?? "-"}</td>
       <td>${event.notes || "-"}</td>
       <td><button class="small danger" data-id="${event.id}">Elimina</button></td>
     `;
@@ -455,6 +467,92 @@ function setNextLineupNumber(team) {
 function syncLineupNumberInputs() {
   setNextLineupNumber("home");
   setNextLineupNumber("away");
+}
+
+
+function persistArchive() {
+  localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archiveState));
+}
+
+function loadArchive() {
+  try {
+    const raw = localStorage.getItem(ARCHIVE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCurrentMatchToArchive() {
+  const id = crypto.randomUUID();
+  archiveState.unshift({
+    id,
+    createdAt: new Date().toISOString(),
+    state: structuredClone(state),
+  });
+  persistArchive();
+  renderArchiveList();
+}
+
+function loadArchivedMatch(id) {
+  const found = archiveState.find((item) => item.id === id);
+  if (!found) return;
+  stopClockInterval();
+  state = structuredClone(found.state);
+  state.clock.running = false;
+  state.clock.lastTick = null;
+  persistAndRender();
+  syncClockIntervalWithState();
+  syncLineupNumberInputs();
+  syncAwayPlayerMode();
+  updateSubstitutionFields();
+}
+
+function deleteArchivedMatch(id) {
+  archiveState = archiveState.filter((item) => item.id !== id);
+  persistArchive();
+  renderArchiveList();
+}
+
+function renderArchiveList() {
+  archiveList.innerHTML = "";
+  if (!archiveState.length) {
+    const empty = document.createElement("li");
+    empty.textContent = "Nessuna gara archiviata";
+    archiveList.append(empty);
+    return;
+  }
+
+  for (const item of archiveState) {
+    const li = document.createElement("li");
+    const home = item.state?.match?.homeTeam || "Casa";
+    const away = item.state?.match?.awayTeam || "Ospite";
+    const when = new Date(item.createdAt).toLocaleString("it-IT");
+    li.innerHTML = `<span>${home} vs ${away} · ${when}</span>`;
+
+    const actions = document.createElement("div");
+    const loadBtn = document.createElement("button");
+    loadBtn.className = "small";
+    loadBtn.type = "button";
+    loadBtn.textContent = "Carica";
+    loadBtn.addEventListener("click", () => loadArchivedMatch(item.id));
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "small danger";
+    delBtn.type = "button";
+    delBtn.textContent = "Elimina";
+    delBtn.addEventListener("click", () => deleteArchivedMatch(item.id));
+
+    actions.append(loadBtn, delBtn);
+    li.append(actions);
+    archiveList.append(li);
+  }
+}
+
+function exportOrSharePdf() {
+  window.print();
 }
 
 function persistAndRender() {

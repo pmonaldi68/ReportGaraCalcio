@@ -237,3 +237,10 @@ td {
   display: flex;
   justify-content: flex-end;
 }
+
+
+.archive-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}

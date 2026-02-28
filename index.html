@@ -211,12 +211,12 @@
             </select>
           </label>
           <label id="event-player-label">
-            <span id="event-player-label-text">Giocatore</span>
-            <input name="player" required placeholder="Giocatore coinvolto" />
+            <span id="event-player-label-text">N° calciatore</span>
+            <input name="playerNumber" type="number" min="1" max="99" required placeholder="Es. 10" />
           </label>
           <label id="sub-in-label" hidden>
-            Giocatore entra
-            <input name="subIn" placeholder="Giocatore che entra" />
+            N° calciatore entra
+            <input name="subInNumber" type="number" min="1" max="99" placeholder="Es. 18" />
           </label>
           <label>
             Note
@@ -240,13 +240,23 @@
               <th>Min</th>
               <th>Squadra</th>
               <th>Tipo</th>
-              <th>Giocatore</th>
+              <th>N°</th>
               <th>Note</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="events-table"></tbody>
         </table>
+      </section>
+
+
+      <section class="card">
+        <h2>Archivio gara & PDF</h2>
+        <div class="archive-actions">
+          <button id="archive-save-btn" type="button">Archivia gara</button>
+          <button id="export-pdf-btn" type="button" class="secondary">Esporta / Condividi PDF</button>
+        </div>
+        <ul id="archive-list" class="list"></ul>
       </section>
 
       <section class="actions">
