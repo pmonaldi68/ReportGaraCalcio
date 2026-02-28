@@ -8,6 +8,7 @@ const defaultState = {
     time: "",
     stadium: "",
     referee: "",
+    homePossession: 50,
   },
   lineups: {
     home: [],
@@ -23,6 +24,8 @@ const defaultState = {
 
 const eventLabels = {
   goal: "Gol",
+  shotOnTarget: "Tiro in porta",
+  foul: "Fallo",
   yellow: "Ammonizione",
   red: "Espulsione",
   substitution: "Sostituzione",
@@ -54,6 +57,28 @@ const liveHomeTeam = document.querySelector("#live-home-team");
 const liveAwayTeam = document.querySelector("#live-away-team");
 const liveHomeGoals = document.querySelector("#live-home-goals");
 const liveAwayGoals = document.querySelector("#live-away-goals");
+const possessionHomeLabel = document.querySelector("#possession-home-label");
+const possessionAwayLabel = document.querySelector("#possession-away-label");
+const possessionHomeValue = document.querySelector("#possession-home-value");
+const possessionAwayValue = document.querySelector("#possession-away-value");
+const possessionHomeBar = document.querySelector("#possession-home-bar");
+const possessionAwayBar = document.querySelector("#possession-away-bar");
+const shotsHomeLabel = document.querySelector("#shots-home-label");
+const shotsAwayLabel = document.querySelector("#shots-away-label");
+const shotsHomeValue = document.querySelector("#shots-home-value");
+const shotsAwayValue = document.querySelector("#shots-away-value");
+const foulsHomeLabel = document.querySelector("#fouls-home-label");
+const foulsAwayLabel = document.querySelector("#fouls-away-label");
+const foulsHomeValue = document.querySelector("#fouls-home-value");
+const foulsAwayValue = document.querySelector("#fouls-away-value");
+const cardsHomeLabel = document.querySelector("#cards-home-label");
+const cardsAwayLabel = document.querySelector("#cards-away-label");
+const cardsHomeTotal = document.querySelector("#cards-home-total");
+const cardsAwayTotal = document.querySelector("#cards-away-total");
+const cardsHomeYellow = document.querySelector("#cards-home-yellow");
+const cardsHomeRed = document.querySelector("#cards-home-red");
+const cardsAwayYellow = document.querySelector("#cards-away-yellow");
+const cardsAwayRed = document.querySelector("#cards-away-red");
 
 matchForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -65,6 +90,7 @@ matchForm.addEventListener("submit", (event) => {
     time: formData.get("time"),
     stadium: formData.get("stadium").trim(),
     referee: formData.get("referee").trim(),
+    homePossession: normalizePossession(formData.get("homePossession")),
   };
   persistAndRender();
 });
@@ -221,14 +247,16 @@ function stopClockInterval() {
 
 function computeStats() {
   const statsByTeam = {
-    home: { goals: 0, yellow: 0, red: 0 },
-    away: { goals: 0, yellow: 0, red: 0 },
+    home: { goals: 0, yellow: 0, red: 0, shotOnTarget: 0, foul: 0 },
+    away: { goals: 0, yellow: 0, red: 0, shotOnTarget: 0, foul: 0 },
   };
 
   for (const event of state.events) {
     if (event.type === "goal") statsByTeam[event.team].goals += 1;
     if (event.type === "yellow") statsByTeam[event.team].yellow += 1;
     if (event.type === "red") statsByTeam[event.team].red += 1;
+    if (event.type === "shotOnTarget") statsByTeam[event.team].shotOnTarget += 1;
+    if (event.type === "foul") statsByTeam[event.team].foul += 1;
   }
 
   return statsByTeam;
@@ -240,6 +268,7 @@ function render() {
   renderLineup("away", awayLineupList);
   renderEvents();
   renderScoreAndStats();
+  renderMatchStats();
   renderClock();
 }
 
@@ -261,6 +290,7 @@ function fillMatchForm() {
   matchForm.time.value = state.match.time;
   matchForm.stadium.value = state.match.stadium;
   matchForm.referee.value = state.match.referee;
+  matchForm.homePossession.value = state.match.homePossession;
 
   eventForm.team.options[0].textContent = state.match.homeTeam;
   eventForm.team.options[1].textContent = state.match.awayTeam;
@@ -307,6 +337,47 @@ function renderScoreAndStats() {
     <div><strong>Totale eventi</strong><br/>${state.events.length}</div>
     <div><strong>Luogo / Arbitro</strong><br/>${state.match.stadium || "-"} / ${state.match.referee || "-"}</div>
   `;
+}
+
+
+function renderMatchStats() {
+  const computed = computeStats();
+  const homePossession = normalizePossession(state.match.homePossession);
+  const awayPossession = 100 - homePossession;
+
+  possessionHomeLabel.textContent = state.match.homeTeam;
+  possessionAwayLabel.textContent = state.match.awayTeam;
+  possessionHomeValue.textContent = `${homePossession}%`;
+  possessionAwayValue.textContent = `${awayPossession}%`;
+  possessionHomeBar.style.width = `${homePossession}%`;
+  possessionAwayBar.style.width = `${awayPossession}%`;
+
+  shotsHomeLabel.textContent = state.match.homeTeam;
+  shotsAwayLabel.textContent = state.match.awayTeam;
+  shotsHomeValue.textContent = String(computed.home.shotOnTarget);
+  shotsAwayValue.textContent = String(computed.away.shotOnTarget);
+
+  foulsHomeLabel.textContent = state.match.homeTeam;
+  foulsAwayLabel.textContent = state.match.awayTeam;
+  foulsHomeValue.textContent = String(computed.home.foul);
+  foulsAwayValue.textContent = String(computed.away.foul);
+
+  cardsHomeLabel.textContent = state.match.homeTeam;
+  cardsAwayLabel.textContent = state.match.awayTeam;
+  cardsHomeTotal.textContent = String(computed.home.yellow + computed.home.red);
+  cardsAwayTotal.textContent = String(computed.away.yellow + computed.away.red);
+  cardsHomeYellow.textContent = computed.home.yellow;
+  cardsHomeRed.textContent = computed.home.red;
+  cardsAwayYellow.textContent = computed.away.yellow;
+  cardsAwayRed.textContent = computed.away.red;
+}
+
+function normalizePossession(value) {
+  const num = Number(value);
+  if (Number.isNaN(num)) {
+    return 50;
+  }
+  return Math.min(100, Math.max(0, Math.round(num)));
 }
 
 function persistAndRender() {
