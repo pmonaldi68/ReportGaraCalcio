@@ -254,27 +254,32 @@ function resetClock() {
 
 function applyElapsedFromLastTick() {
   if (!state.clock.running || state.clock.lastTick === null) {
-    return;
+    return false;
   }
   const now = Date.now();
   const deltaSeconds = Math.floor((now - state.clock.lastTick) / 1000);
   if (deltaSeconds > 0) {
     state.clock.elapsedSeconds += deltaSeconds;
     state.clock.lastTick += deltaSeconds * 1000;
+    return true;
   }
+  return false;
 }
 
 function syncClockIntervalWithState() {
   stopClockInterval();
   if (state.clock.running) {
     clockInterval = setInterval(() => {
-      applyElapsedFromLastTick();
+      const changed = applyElapsedFromLastTick();
+      if (!changed) {
+        return;
+      }
       renderClock();
       if (autoMinuteInput.checked) {
         setEventMinuteFromClock();
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }, 250);
+    }, 500);
   }
 }
 
@@ -307,7 +312,6 @@ function render() {
   renderEvents();
   renderScoreAndStats();
   renderClock();
-  renderArchiveList();
 }
 
 function renderClock() {
@@ -594,4 +598,5 @@ syncClockIntervalWithState();
 syncLineupNumberInputs();
 syncAwayPlayerMode();
 updateSubstitutionFields();
+renderArchiveList();
 render();
