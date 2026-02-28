@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Report Gara Calcio</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>⚽ Report Gara Calcio</h1>
+      <p>Gestisci dettagli della gara, formazioni ed eventi in tempo reale.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Dettagli gara</h2>
+        <form id="match-form" class="grid">
+          <label>
+            Squadra casa
+            <select required name="homeTeam">
+              <option value="">Seleziona squadra casa</option>
+              <option value="ANITRELLA">ANITRELLA</option>
+              <option value="ALATRI">ALATRI</option>
+              <option value="ATLETICO LARIANO">ATLETICO LARIANO</option>
+              <option value="ATLETICO TORRENOVA 1986">ATLETICO TORRENOVA 1986</option>
+              <option value="BELMONTE CASTELLO">BELMONTE CASTELLO</option>
+              <option value="BOVILLE ERNICA CALCIO">BOVILLE ERNICA CALCIO</option>
+              <option value="CITTA DI CEPRANO CALCIO">CITTA DI CEPRANO CALCIO</option>
+              <option value="CITTA MONTE S.G. CAMPANO">CITTA MONTE S.G. CAMPANO</option>
+              <option value="CYNTHIA 1920">CYNTHIA 1920</option>
+              <option value="FOLGORE AMASENO">FOLGORE AMASENO</option>
+              <option value="MAGNITUDO FCCG">MAGNITUDO FCCG</option>
+              <option value="REAL SAN BASILIO 1960">REAL SAN BASILIO 1960</option>
+              <option value="ROCCA PRIORA RDP CALCIO">ROCCA PRIORA RDP CALCIO</option>
+              <option value="VIVACE GROTTAFERRATA 1922">VIVACE GROTTAFERRATA 1922</option>
+              <option value="VIGOR PERCONTI">VIGOR PERCONTI</option>
+              <option value="ATLETICO MORENA">ATLETICO MORENA</option>
+              <option value="POLISPORTIVA DE ROSSI">POLISPORTIVA DE ROSSI</option>
+              <option value="CANARINI 1926 RDP">CANARINI 1926 RDP</option>
+            </select>
+          </label>
+          <label>
+            Squadra ospite
+            <select required name="awayTeam">
+              <option value="">Seleziona squadra ospite</option>
+              <option value="ANITRELLA">ANITRELLA</option>
+              <option value="ALATRI">ALATRI</option>
+              <option value="ATLETICO LARIANO">ATLETICO LARIANO</option>
+              <option value="ATLETICO TORRENOVA 1986">ATLETICO TORRENOVA 1986</option>
+              <option value="BELMONTE CASTELLO">BELMONTE CASTELLO</option>
+              <option value="BOVILLE ERNICA CALCIO">BOVILLE ERNICA CALCIO</option>
+              <option value="CITTA DI CEPRANO CALCIO">CITTA DI CEPRANO CALCIO</option>
+              <option value="CITTA MONTE S.G. CAMPANO">CITTA MONTE S.G. CAMPANO</option>
+              <option value="CYNTHIA 1920">CYNTHIA 1920</option>
+              <option value="FOLGORE AMASENO">FOLGORE AMASENO</option>
+              <option value="MAGNITUDO FCCG">MAGNITUDO FCCG</option>
+              <option value="REAL SAN BASILIO 1960">REAL SAN BASILIO 1960</option>
+              <option value="ROCCA PRIORA RDP CALCIO">ROCCA PRIORA RDP CALCIO</option>
+              <option value="VIVACE GROTTAFERRATA 1922">VIVACE GROTTAFERRATA 1922</option>
+              <option value="VIGOR PERCONTI">VIGOR PERCONTI</option>
+              <option value="ATLETICO MORENA">ATLETICO MORENA</option>
+              <option value="POLISPORTIVA DE ROSSI">POLISPORTIVA DE ROSSI</option>
+              <option value="CANARINI 1926 RDP">CANARINI 1926 RDP</option>
+            </select>
+          </label>
+          <label>
+            Data
+            <input type="date" required name="date" />
+          </label>
+          <label>
+            Orario
+            <input type="time" required name="time" />
+          </label>
+          <label>
+            Campo
+            <select name="stadium">
+              <option value="">Seleziona campo</option>
+              <option value="ABBAFATI ROBERTO">ABBAFATI ROBERTO</option>
+              <option value="ABBATINI BRUNO">ABBATINI BRUNO</option>
+              <option value="BIAMANI UMBERTO">BIAMANI UMBERTO</option>
+              <option value="C.S. VIGOR">C.S. VIGOR</option>
+              <option value="CATENA MASSIMILIANO">CATENA MASSIMILIANO</option>
+              <option value="CEREATE CASAMARI">CEREATE CASAMARI</option>
+              <option value="CHIAPPITTO">CHIAPPITTO</option>
+              <option value="CINECITTA' DUE">CINECITTA' DUE</option>
+              <option value="COMUNALE">COMUNALE</option>
+              <option value="COMUNALE">COMUNALE</option>
+              <option value="COMUNALE">COMUNALE</option>
+              <option value="GAVINI LIONELLO">GAVINI LIONELLO</option>
+              <option value="GIANNI FRANCESCA">GIANNI FRANCESCA</option>
+              <option value="LIRI">LIRI</option>
+              <option value="MONTORLI">MONTORLI</option>
+              <option value="SAN VITTORE">SAN VITTORE</option>
+              <option value="SUPERGA">SUPERGA</option>
+              <option value="TRE TORRI B">TRE TORRI B</option>
+            </select>
+          </label>
+          <button type="submit">Salva dettagli gara</button>
+        </form>
+      </section>
+
+      <section class="card live-score-card">
+        <h2>Risultato in tempo reale</h2>
+        <div class="live-scoreboard" aria-live="polite">
+          <span id="live-home-team" class="team-name">Casa</span>
+          <span id="live-home-goals" class="team-goals">0</span>
+          <span class="dash">-</span>
+          <span id="live-away-goals" class="team-goals">0</span>
+          <span id="live-away-team" class="team-name">Ospite</span>
+        </div>
+      </section>
+
+      <section class="card match-clock-card">
+        <h2>Cronometro gara</h2>
+        <div class="clock-wrap">
+          <p id="clock-display" class="clock-display">00:00</p>
+          <p id="clock-phase" class="muted">1° tempo</p>
+          <p class="muted">Minuto evento automatico: <strong id="clock-minute">0'</strong></p>
+          <div class="clock-actions">
+            <button id="clock-start" type="button">Avvia</button>
+            <button id="clock-pause" type="button" class="secondary">Pausa</button>
+            <button id="clock-reset" type="button" class="danger">Reset</button>
+            <button id="clock-next-phase" type="button" class="secondary">Inizia 2° tempo</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card two-col">
+        <div>
+          <h2 id="home-lineup-title">Formazione casa</h2>
+          <form id="home-lineup-form" class="inline-form">
+            <input name="player" placeholder="Nome giocatore" required />
+            <select name="number" required aria-label="Numero maglia casa"></select>
+            <button type="submit">Aggiungi</button>
+          </form>
+          <ul id="home-lineup" class="list"></ul>
+          <div class="leaders-grid">
+            <label>
+              Capitano
+              <select id="home-captain-select"></select>
+            </label>
+            <label>
+              Vice capitano
+              <select id="home-vice-captain-select"></select>
+            </label>
+          </div>
+        </div>
+        <div>
+          <h2 id="away-lineup-title">Formazione ospite</h2>
+          <form id="away-lineup-form" class="inline-form">
+            <input id="away-player-input" name="player" placeholder="Nome giocatore" required />
+            <select id="away-player-select" name="playerSelect" hidden>
+              <option value="">Seleziona giocatore CYNTHIA 1920</option>
+              <option value="BISCONTI CLAUDIO">BISCONTI CLAUDIO</option>
+              <option value="CALDARINI DAMIANO">CALDARINI DAMIANO</option>
+              <option value="CAMPOLI DIEGO">CAMPOLI DIEGO</option>
+              <option value="COLAGROSSI MATTEO">COLAGROSSI MATTEO</option>
+              <option value="D'AGAPITI PIERPAOLO">D'AGAPITI PIERPAOLO</option>
+              <option value="DE BONIS MATTEO">DE BONIS MATTEO</option>
+              <option value="DE CICCHI ALESSANDRO">DE CICCHI ALESSANDRO</option>
+              <option value="DI VENTURA MARIO">DI VENTURA MARIO</option>
+              <option value="EVANGELISTI ANDREA">EVANGELISTI ANDREA</option>
+              <option value="FALCHETTI MANUEL">FALCHETTI MANUEL</option>
+              <option value="FALCONI FLAVIO">FALCONI FLAVIO</option>
+              <option value="FRISCIONI LEONARDO">FRISCIONI LEONARDO</option>
+              <option value="GIUBBINI LUCA">GIUBBINI LUCA</option>
+              <option value="GUTIERREZ A. AUGUSTIN">GUTIERREZ A. AUGUSTIN</option>
+              <option value="IPPOLITO RICCARDO">IPPOLITO RICCARDO</option>
+              <option value="LESTINI FABIO">LESTINI FABIO</option>
+              <option value="MACELLARI MATTEO">MACELLARI MATTEO</option>
+              <option value="MARKU AMARILDO">MARKU AMARILDO</option>
+              <option value="MATTIA DAVIDE">MATTIA DAVIDE</option>
+              <option value="MONNI TIZIANO">MONNI TIZIANO</option>
+              <option value="MORTAROLI MATTEO">MORTAROLI MATTEO</option>
+              <option value="PEPE MATTEO">PEPE MATTEO</option>
+              <option value="PERI LORENZO">PERI LORENZO</option>
+              <option value="PRESCIUTTI ANDREA">PRESCIUTTI ANDREA</option>
+              <option value="RANIERI VALERIO">RANIERI VALERIO</option>
+              <option value="SANGERMANO GIORDANO">SANGERMANO GIORDANO</option>
+              <option value="SANTI PIERLUIGI">SANTI PIERLUIGI</option>
+              <option value="SERAFINI SIMONE">SERAFINI SIMONE</option>
+              <option value="TOFA FRANCESCO">TOFA FRANCESCO</option>
+              <option value="UGOLINI MANUEL">UGOLINI MANUEL</option>
+            </select>
+            <select name="number" required aria-label="Numero maglia ospite"></select>
+            <button type="submit">Aggiungi</button>
+          </form>
+          <ul id="away-lineup" class="list"></ul>
+          <div class="leaders-grid">
+            <label>
+              Capitano
+              <select id="away-captain-select"></select>
+            </label>
+            <label>
+              Vice capitano
+              <select id="away-vice-captain-select"></select>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Registra evento</h2>
+        <form id="event-form" class="grid">
+          <label>
+            Minuto (automatico)
+            <input type="number" min="0" max="130" name="minute" required readonly />
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" name="autoMinute" checked />
+            Usa minuto automatico del cronometro
+          </label>
+          <label>
+            Squadra
+            <select name="team" required>
+              <option value="home">Casa</option>
+              <option value="away">Ospite</option>
+            </select>
+          </label>
+          <label>
+            Tipo evento
+            <select name="type" required>
+              <option value="goal">Gol</option>
+              <option value="yellow">Ammonizione</option>
+              <option value="red">Espulsione</option>
+              <option value="substitution">Sostituzione</option>
+              <option value="penaltyMissed">Rigore sbagliato</option>
+            </select>
+          </label>
+          <label id="event-player-label">
+            <span id="event-player-label-text">N° calciatore</span>
+            <select name="playerNumber" id="event-player-number" required>
+              <option value="">Seleziona numero</option>
+            </select>
+          </label>
+          <label id="sub-in-label" hidden>
+            N° calciatore entra
+            <select name="subInNumber" id="event-sub-in-number">
+              <option value="">Seleziona numero</option>
+            </select>
+          </label>
+          <label>
+            Note
+            <input name="notes" placeholder="Assist, motivo, sostituito..." />
+          </label>
+          <button type="submit">Aggiungi evento</button>
+        </form>
+      </section>
+
+      <section class="card scorecard">
+        <h2>Punteggio & statistiche</h2>
+        <p id="scoreline">Casa 0 - 0 Ospite</p>
+        <div id="stats" class="stats"></div>
+      </section>
+
+      <section class="card">
+        <h2>Cronologia eventi</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Min</th>
+              <th>Squadra</th>
+              <th>Tipo</th>
+              <th>N°</th>
+              <th>Note</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="events-table"></tbody>
+        </table>
+      </section>
+
+
+      <section class="card">
+        <h2>Archivio gara & PDF</h2>
+        <div class="archive-actions">
+          <button id="archive-save-btn" type="button">Archivia gara</button>
+          <button id="export-pdf-btn" type="button" class="secondary">Esporta / Condividi PDF</button>
+        </div>
+        <ul id="archive-list" class="list"></ul>
+      </section>
+
+      <section class="actions">
+        <button id="reset-btn" class="danger">Reset completo</button>
+      </section>
+    </main>
+
+    <template id="lineup-item-template">
+      <li>
+        <span class="player-info"></span>
+        <button class="small danger" type="button">Rimuovi</button>
+      </li>
+    </template>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
