@@ -8,7 +8,6 @@ const defaultState = {
     date: "",
     time: "",
     stadium: "",
-    referee: "",
   },
   lineups: {
     home: [],
@@ -78,7 +77,6 @@ matchForm.addEventListener("submit", (event) => {
     date: formData.get("date"),
     time: formData.get("time"),
     stadium: formData.get("stadium").trim(),
-    referee: formData.get("referee").trim(),
   };
   persistAndRender();
   syncAwayPlayerMode();
@@ -331,7 +329,6 @@ function fillMatchForm() {
   matchForm.date.value = state.match.date;
   matchForm.time.value = state.match.time;
   matchForm.stadium.value = state.match.stadium;
-  matchForm.referee.value = state.match.referee;
 
   eventForm.team.options[0].textContent = getTeamName("home");
   eventForm.team.options[1].textContent = getTeamName("away");
@@ -384,7 +381,7 @@ function renderScoreAndStats() {
     <div><strong>${homeTeamName}</strong><br/>🟨 ${computed.home.yellow} · 🟥 ${computed.home.red}</div>
     <div><strong>${awayTeamName}</strong><br/>🟨 ${computed.away.yellow} · 🟥 ${computed.away.red}</div>
     <div><strong>Totale eventi</strong><br/>${state.events.length}</div>
-    <div><strong>Luogo / Arbitro</strong><br/>${state.match.stadium || "-"} / ${state.match.referee || "-"}</div>
+    <div><strong>Campo</strong><br/>${state.match.stadium || "-"}</div>
   `;
 }
 
