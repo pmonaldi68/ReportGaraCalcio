@@ -1,4 +1,5 @@
 const STORAGE_KEY = "report-gara-calcio-v1";
+const MAX_LINEUP_NUMBER = 20;
 const defaultState = {
   match: {
     homeTeam: "",
@@ -53,6 +54,8 @@ const liveHomeTeam = document.querySelector("#live-home-team");
 const liveAwayTeam = document.querySelector("#live-away-team");
 const liveHomeGoals = document.querySelector("#live-home-goals");
 const liveAwayGoals = document.querySelector("#live-away-goals");
+const homeNumberInput = homeLineupForm.querySelector('input[name="number"]');
+const awayNumberInput = awayLineupForm.querySelector('input[name="number"]');
 
 matchForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -125,7 +128,7 @@ function addLineupPlayer(event, team, form) {
   const player = typeof rawPlayer === "string" ? rawPlayer.trim() : "";
   const number = Number(formData.get("number"));
 
-  if (!player || Number.isNaN(number)) {
+  if (!player || Number.isNaN(number) || number < 1 || number > MAX_LINEUP_NUMBER) {
     return;
   }
 
@@ -144,13 +147,15 @@ function addLineupPlayer(event, team, form) {
   });
 
   state.lineups[team].sort((a, b) => a.number - b.number);
-  form.reset();
+  form.player.selectedIndex = 0;
   persistAndRender();
+  setNextLineupNumber(team);
 }
 
 function removeLineupPlayer(team, id) {
   state.lineups[team] = state.lineups[team].filter((player) => player.id !== id);
   persistAndRender();
+  setNextLineupNumber(team);
 }
 
 function removeEvent(id) {
@@ -325,6 +330,26 @@ function renderScoreAndStats() {
   `;
 }
 
+function getNextLineupNumber(team) {
+  if (!state.lineups[team].length) {
+    return 1;
+  }
+
+  const maxAssigned = Math.max(...state.lineups[team].map((player) => player.number));
+  return Math.min(MAX_LINEUP_NUMBER, maxAssigned + 1);
+}
+
+function setNextLineupNumber(team) {
+  const next = getNextLineupNumber(team);
+  const targetInput = team === "home" ? homeNumberInput : awayNumberInput;
+  targetInput.value = String(next);
+}
+
+function syncLineupNumberInputs() {
+  setNextLineupNumber("home");
+  setNextLineupNumber("away");
+}
+
 function persistAndRender() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   render();
@@ -361,4 +386,5 @@ function loadState() {
 minuteInput.readOnly = autoMinuteInput.checked;
 setEventMinuteFromClock();
 syncClockIntervalWithState();
+syncLineupNumberInputs();
 render();
