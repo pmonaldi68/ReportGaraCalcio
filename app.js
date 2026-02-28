@@ -64,7 +64,7 @@ const eventTypeSelect = eventForm.querySelector('select[name="type"]');
 const eventPlayerLabel = document.querySelector("#event-player-label");
 const eventPlayerLabelText = document.querySelector("#event-player-label-text");
 const subInLabel = document.querySelector("#sub-in-label");
-const subInInput = eventForm.querySelector('input[name="subInNumber"]');
+const subInInput = eventForm.querySelector('select[name="subInNumber"]');
 const archiveSaveBtn = document.querySelector("#archive-save-btn");
 const exportPdfBtn = document.querySelector("#export-pdf-btn");
 const archiveList = document.querySelector("#archive-list");
@@ -109,13 +109,13 @@ eventForm.addEventListener("submit", (event) => {
   let playerNumber = Number(formData.get("playerNumber"));
   let notes = baseNotes;
 
-  if (!Number.isFinite(playerNumber)) {
+  if (!Number.isFinite(playerNumber) || playerNumber < 1 || playerNumber > MAX_LINEUP_NUMBER) {
     return;
   }
 
   if (type === "substitution") {
     const subInNumber = Number(formData.get("subInNumber"));
-    if (!Number.isFinite(playerNumber) || !Number.isFinite(subInNumber)) {
+    if (!Number.isFinite(playerNumber) || !Number.isFinite(subInNumber) || subInNumber < 1 || subInNumber > MAX_LINEUP_NUMBER) {
       return;
     }
     notes = `Entra n° ${subInNumber}${baseNotes ? ` · ${baseNotes}` : ""}`;
@@ -206,7 +206,6 @@ function updateSubstitutionFields() {
   const isSubstitution = eventTypeSelect.value === "substitution";
 
   eventPlayerLabelText.textContent = isSubstitution ? "N° calciatore esce" : "N° calciatore";
-  eventForm.playerNumber.placeholder = isSubstitution ? "Es. 10" : "Es. 10";
   eventForm.playerNumber.required = true;
 
   subInLabel.hidden = !isSubstitution;
