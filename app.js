@@ -1,6 +1,16 @@
 const STORAGE_KEY = "report-gara-calcio-v1";
 const ARCHIVE_KEY = "report-gara-calcio-archive-v1";
 const MAX_LINEUP_NUMBER = 20;
+const CLOCK_PHASES = {
+  firstHalf: "firstHalf",
+  firstHalfStoppage: "firstHalfStoppage",
+  secondHalf: "secondHalf",
+  secondHalfStoppage: "secondHalfStoppage",
+  finished: "finished",
+};
+
+const REGULAR_HALF_SECONDS = 45 * 60;
+
 const defaultState = {
   match: {
     homeTeam: "",
@@ -17,6 +27,7 @@ const defaultState = {
     elapsedSeconds: 0,
     running: false,
     lastTick: null,
+    phase: CLOCK_PHASES.firstHalf,
   },
   events: [],
 };
@@ -47,10 +58,12 @@ const lineupItemTemplate = document.querySelector("#lineup-item-template");
 const minuteInput = eventForm.querySelector('input[name="minute"]');
 const autoMinuteInput = eventForm.querySelector('input[name="autoMinute"]');
 const clockDisplay = document.querySelector("#clock-display");
+const clockPhase = document.querySelector("#clock-phase");
 const clockMinute = document.querySelector("#clock-minute");
 const clockStartBtn = document.querySelector("#clock-start");
 const clockPauseBtn = document.querySelector("#clock-pause");
 const clockResetBtn = document.querySelector("#clock-reset");
+const clockNextPhaseBtn = document.querySelector("#clock-next-phase");
 const liveHomeTeam = document.querySelector("#live-home-team");
 const liveAwayTeam = document.querySelector("#live-away-team");
 const liveHomeGoals = document.querySelector("#live-home-goals");
@@ -140,6 +153,7 @@ eventForm.addEventListener("submit", (event) => {
 clockStartBtn.addEventListener("click", startClock);
 clockPauseBtn.addEventListener("click", pauseClock);
 clockResetBtn.addEventListener("click", resetClock);
+clockNextPhaseBtn.addEventListener("click", goToNextClockPhase);
 archiveSaveBtn.addEventListener("click", saveCurrentMatchToArchive);
 exportPdfBtn.addEventListener("click", exportOrSharePdf);
 
@@ -214,18 +228,65 @@ function updateSubstitutionFields() {
   }
 }
 
+function getPhaseElapsedSeconds() {
+  return state.clock.elapsedSeconds % REGULAR_HALF_SECONDS;
+}
+
 function getClockMinute() {
-  return Math.floor(state.clock.elapsedSeconds / 60);
+  const fullMinutes = Math.floor(state.clock.elapsedSeconds / 60);
+  if (fullMinutes < 45) return fullMinutes;
+  if (state.clock.phase === CLOCK_PHASES.firstHalfStoppage) return 45;
+  if (fullMinutes < 90) return fullMinutes;
+  return 90;
 }
 
 function setEventMinuteFromClock() {
   minuteInput.value = String(getClockMinute());
 }
 
+function getClockPhaseLabel() {
+  if (state.clock.phase === CLOCK_PHASES.firstHalf) {
+    return "1° tempo";
+  }
+  if (state.clock.phase === CLOCK_PHASES.firstHalfStoppage) {
+    const stoppageMinutes = Math.floor(getPhaseElapsedSeconds() / 60);
+    return `Recupero 1° tempo +${stoppageMinutes}'`;
+  }
+  if (state.clock.phase === CLOCK_PHASES.secondHalf) {
+    return "2° tempo";
+  }
+  if (state.clock.phase === CLOCK_PHASES.secondHalfStoppage) {
+    const stoppageMinutes = Math.floor(getPhaseElapsedSeconds() / 60);
+    return `Recupero 2° tempo +${stoppageMinutes}'`;
+  }
+  return "Gara terminata";
+}
+
+function handleRegularTimeBoundary() {
+  if (state.clock.phase === CLOCK_PHASES.firstHalf && state.clock.elapsedSeconds >= REGULAR_HALF_SECONDS) {
+    state.clock.running = false;
+    state.clock.lastTick = null;
+    state.clock.phase = CLOCK_PHASES.firstHalfStoppage;
+    stopClockInterval();
+    return true;
+  }
+
+  if (state.clock.phase === CLOCK_PHASES.secondHalf && state.clock.elapsedSeconds >= 2 * REGULAR_HALF_SECONDS) {
+    state.clock.running = false;
+    state.clock.lastTick = null;
+    state.clock.phase = CLOCK_PHASES.secondHalfStoppage;
+    stopClockInterval();
+    return true;
+  }
+
+  return false;
+}
+
 function startClock() {
-  if (state.clock.running) {
+  if (state.clock.running || state.clock.phase === CLOCK_PHASES.finished) {
     return;
   }
+
   state.clock.running = true;
   state.clock.lastTick = Date.now();
   syncClockIntervalWithState();
@@ -245,7 +306,29 @@ function pauseClock() {
 
 function resetClock() {
   state.clock.elapsedSeconds = 0;
-  state.clock.lastTick = state.clock.running ? Date.now() : null;
+  state.clock.phase = CLOCK_PHASES.firstHalf;
+  state.clock.running = false;
+  state.clock.lastTick = null;
+  stopClockInterval();
+  setEventMinuteFromClock();
+  persistAndRender();
+}
+
+function goToNextClockPhase() {
+  if (state.clock.running) {
+    return;
+  }
+
+  if (state.clock.phase === CLOCK_PHASES.firstHalfStoppage) {
+    state.clock.phase = CLOCK_PHASES.secondHalf;
+    state.clock.elapsedSeconds = REGULAR_HALF_SECONDS;
+  } else if (state.clock.phase === CLOCK_PHASES.secondHalfStoppage) {
+    state.clock.phase = CLOCK_PHASES.finished;
+    state.clock.elapsedSeconds = 2 * REGULAR_HALF_SECONDS;
+  } else {
+    return;
+  }
+
   setEventMinuteFromClock();
   persistAndRender();
 }
@@ -259,6 +342,8 @@ function applyElapsedFromLastTick() {
   if (deltaSeconds > 0) {
     state.clock.elapsedSeconds += deltaSeconds;
     state.clock.lastTick += deltaSeconds * 1000;
+
+    handleRegularTimeBoundary();
     return true;
   }
   return false;
@@ -313,14 +398,32 @@ function render() {
 }
 
 function renderClock() {
-  const minutes = Math.floor(state.clock.elapsedSeconds / 60)
+  const phaseSeconds = getPhaseElapsedSeconds();
+  const minutes = Math.floor(phaseSeconds / 60)
     .toString()
     .padStart(2, "0");
-  const seconds = (state.clock.elapsedSeconds % 60).toString().padStart(2, "0");
+  const seconds = (phaseSeconds % 60).toString().padStart(2, "0");
   clockDisplay.textContent = `${minutes}:${seconds}`;
+  clockPhase.textContent = getClockPhaseLabel();
   clockMinute.textContent = `${getClockMinute()}'`;
-  clockStartBtn.disabled = state.clock.running;
+
+  const canStart = !state.clock.running
+    && state.clock.phase !== CLOCK_PHASES.firstHalfStoppage
+    && state.clock.phase !== CLOCK_PHASES.secondHalfStoppage
+    && state.clock.phase !== CLOCK_PHASES.finished;
+
+  clockStartBtn.disabled = !canStart;
   clockPauseBtn.disabled = !state.clock.running;
+  clockNextPhaseBtn.disabled = state.clock.running
+    || (state.clock.phase !== CLOCK_PHASES.firstHalfStoppage && state.clock.phase !== CLOCK_PHASES.secondHalfStoppage);
+
+  if (state.clock.phase === CLOCK_PHASES.firstHalfStoppage) {
+    clockNextPhaseBtn.textContent = "Inizia 2° tempo";
+  } else if (state.clock.phase === CLOCK_PHASES.secondHalfStoppage) {
+    clockNextPhaseBtn.textContent = "Termina gara";
+  } else {
+    clockNextPhaseBtn.textContent = "Inizia 2° tempo";
+  }
 }
 
 function fillMatchForm() {
@@ -578,8 +681,24 @@ function loadState() {
       clock: { ...defaultState.clock, ...(parsed.clock || {}) },
     };
 
+    if (!Object.values(CLOCK_PHASES).includes(merged.clock.phase)) {
+      if (merged.clock.elapsedSeconds >= 2 * REGULAR_HALF_SECONDS) {
+        merged.clock.phase = CLOCK_PHASES.secondHalfStoppage;
+      } else if (merged.clock.elapsedSeconds >= REGULAR_HALF_SECONDS) {
+        merged.clock.phase = CLOCK_PHASES.firstHalfStoppage;
+      } else {
+        merged.clock.phase = CLOCK_PHASES.firstHalf;
+      }
+    }
+
     if (merged.clock.running && merged.clock.lastTick === null) {
       merged.clock.lastTick = Date.now();
+    }
+
+    if (merged.clock.phase === CLOCK_PHASES.finished) {
+      merged.clock.running = false;
+      merged.clock.lastTick = null;
+      merged.clock.elapsedSeconds = 2 * REGULAR_HALF_SECONDS;
     }
 
     return merged;

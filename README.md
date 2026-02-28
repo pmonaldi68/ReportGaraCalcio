@@ -8,7 +8,7 @@ Web app semplice (HTML/CSS/JS) per gestire una gara di calcio:
 - negli altri casi inserimento giocatore manuale
 - numerazione automatica formazione da 1 a 20 (incrementale)
 - eventi partita con numero calciatore (gol, ammonizioni, espulsioni, sostituzioni, rigori sbagliati)
-- cronometro gara con minuto automatico per gli eventi
+- cronometro gara 1°/2° tempo con stop automatico al 45' e 90' + gestione recupero e minuto automatico eventi
 - cronologia eventi con eliminazione
 - archiviazione locale di più gare (carica/elimina archivio)
 - esportazione/condivisione PDF tramite stampa browser
