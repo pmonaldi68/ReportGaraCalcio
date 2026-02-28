@@ -1,8 +1,8 @@
 const STORAGE_KEY = "report-gara-calcio-v1";
 const defaultState = {
   match: {
-    homeTeam: "Casa",
-    awayTeam: "Ospite",
+    homeTeam: "",
+    awayTeam: "",
     date: "",
     time: "",
     stadium: "",
@@ -58,8 +58,8 @@ matchForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const formData = new FormData(matchForm);
   state.match = {
-    homeTeam: formData.get("homeTeam").trim() || "Casa",
-    awayTeam: formData.get("awayTeam").trim() || "Ospite",
+    homeTeam: formData.get("homeTeam").trim(),
+    awayTeam: formData.get("awayTeam").trim(),
     date: formData.get("date"),
     time: formData.get("time"),
     stadium: formData.get("stadium").trim(),
@@ -270,8 +270,8 @@ function fillMatchForm() {
   matchForm.stadium.value = state.match.stadium;
   matchForm.referee.value = state.match.referee;
 
-  eventForm.team.options[0].textContent = state.match.homeTeam;
-  eventForm.team.options[1].textContent = state.match.awayTeam;
+  eventForm.team.options[0].textContent = getTeamName("home");
+  eventForm.team.options[1].textContent = getTeamName("away");
 }
 
 function renderLineup(team, listEl) {
@@ -290,7 +290,7 @@ function renderEvents() {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${event.minute}'</td>
-      <td>${event.team === "home" ? state.match.homeTeam : state.match.awayTeam}</td>
+      <td>${event.team === "home" ? getTeamName("home") : getTeamName("away")}</td>
       <td>${eventLabels[event.type]}</td>
       <td>${event.player}</td>
       <td>${event.notes || "-"}</td>
@@ -301,17 +301,25 @@ function renderEvents() {
   }
 }
 
+function getTeamName(side) {
+  const name = side === "home" ? state.match.homeTeam : state.match.awayTeam;
+  if (name && name.trim()) return name;
+  return side === "home" ? "Casa" : "Ospite";
+}
+
 function renderScoreAndStats() {
   const computed = computeStats();
-  scoreline.textContent = `${state.match.homeTeam} ${computed.home.goals} - ${computed.away.goals} ${state.match.awayTeam}`;
-  liveHomeTeam.textContent = state.match.homeTeam;
-  liveAwayTeam.textContent = state.match.awayTeam;
+  const homeTeamName = getTeamName("home");
+  const awayTeamName = getTeamName("away");
+  scoreline.textContent = `${homeTeamName} ${computed.home.goals} - ${computed.away.goals} ${awayTeamName}`;
+  liveHomeTeam.textContent = homeTeamName;
+  liveAwayTeam.textContent = awayTeamName;
   liveHomeGoals.textContent = String(computed.home.goals);
   liveAwayGoals.textContent = String(computed.away.goals);
 
   stats.innerHTML = `
-    <div><strong>${state.match.homeTeam}</strong><br/>🟨 ${computed.home.yellow} · 🟥 ${computed.home.red}</div>
-    <div><strong>${state.match.awayTeam}</strong><br/>🟨 ${computed.away.yellow} · 🟥 ${computed.away.red}</div>
+    <div><strong>${homeTeamName}</strong><br/>🟨 ${computed.home.yellow} · 🟥 ${computed.home.red}</div>
+    <div><strong>${awayTeamName}</strong><br/>🟨 ${computed.away.yellow} · 🟥 ${computed.away.red}</div>
     <div><strong>Totale eventi</strong><br/>${state.events.length}</div>
     <div><strong>Luogo / Arbitro</strong><br/>${state.match.stadium || "-"} / ${state.match.referee || "-"}</div>
   `;
