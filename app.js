@@ -207,10 +207,17 @@ resetBtn.addEventListener("click", () => {
   syncAwayPlayerMode();
 });
 
+function normalizePlayerName(playerName) {
+  return String(playerName || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toUpperCase();
+}
+
 function addLineupPlayer(event, team, form) {
   event.preventDefault();
   const formData = new FormData(form);
-  const player = getSelectedLineupPlayer(team, formData);
+  const player = normalizePlayerName(getSelectedLineupPlayer(team, formData));
   const number = Number(formData.get("number"));
 
   if (!player || Number.isNaN(number) || number < 1 || number > MAX_LINEUP_NUMBER) {
@@ -260,6 +267,7 @@ function updateSubstitutionFields() {
 
   subInLabel.hidden = !isSubstitution;
   subInInput.required = isSubstitution;
+  subInInput.disabled = !isSubstitution;
 
   if (!isSubstitution) {
     subInInput.value = "";
