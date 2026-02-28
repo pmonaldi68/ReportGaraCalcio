@@ -170,6 +170,7 @@ button:disabled {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: clamp(1.15rem, 2.3vw, 1.6rem);
 }
 
 .team-goals {
@@ -224,8 +225,9 @@ button:disabled {
 }
 
 #scoreline {
-  font-size: 1.5rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 700;
+  line-height: 1.25;
 }
 
 .stats {
@@ -277,9 +279,79 @@ td {
 }
 
 
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inline-form {
+    grid-template-columns: 1fr;
+  }
+
+  .inline-form button {
+    width: 100%;
+  }
+
+  .live-scoreboard {
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  .team-name {
+    max-width: 42vw;
+  }
+
+  .clock-actions {
+    width: 100%;
+  }
+
+  .clock-actions button,
+  .archive-actions button {
+    flex: 1 1 45%;
+    min-width: 140px;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
 @media (max-width: 560px) {
+  main {
+    width: 95vw;
+    margin: 1rem auto 2rem;
+  }
+
+  .card {
+    padding: 0.75rem;
+  }
+
   .leaders-grid {
     grid-template-columns: 1fr;
+  }
+
+  .live-scoreboard {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto auto minmax(0, 1fr);
+    align-items: center;
+    width: 100%;
+  }
+
+  .team-name {
+    max-width: 100%;
+    font-size: 1.05rem;
+  }
+
+  .clock-display {
+    font-size: clamp(2.2rem, 12vw, 3.2rem);
+  }
+
+  .clock-actions button,
+  .archive-actions button {
+    flex-basis: 100%;
+    min-width: 0;
   }
 }
 
