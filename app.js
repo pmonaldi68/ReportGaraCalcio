@@ -116,9 +116,16 @@ const archiveList = document.querySelector("#archive-list");
 matchForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const formData = new FormData(matchForm);
+  const homeTeam = normalizeTeamName(formData.get("homeTeam"));
+  const awayTeam = normalizeTeamName(formData.get("awayTeam"));
+
+  if (!validateTeamsAreDifferent(homeTeam, awayTeam)) {
+    return;
+  }
+
   state.match = {
-    homeTeam: normalizeTeamName(formData.get("homeTeam")),
-    awayTeam: normalizeTeamName(formData.get("awayTeam")),
+    homeTeam,
+    awayTeam,
     date: formData.get("date"),
     time: formData.get("time"),
     stadium: formData.get("stadium").trim(),
@@ -142,6 +149,8 @@ homeCaptainSelect.addEventListener("change", () => setLeader("home", "captain", 
 homeViceCaptainSelect.addEventListener("change", () => setLeader("home", "viceCaptain", homeViceCaptainSelect.value));
 awayCaptainSelect.addEventListener("change", () => setLeader("away", "captain", awayCaptainSelect.value));
 awayViceCaptainSelect.addEventListener("change", () => setLeader("away", "viceCaptain", awayViceCaptainSelect.value));
+matchForm.homeTeam.addEventListener("change", clearTeamSelectionValidation);
+matchForm.awayTeam.addEventListener("change", clearTeamSelectionValidation);
 
 eventForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -212,6 +221,23 @@ function normalizePlayerName(playerName) {
     .trim()
     .replace(/\s+/g, " ")
     .toUpperCase();
+}
+
+function validateTeamsAreDifferent(homeTeam, awayTeam) {
+  if (homeTeam && awayTeam && homeTeam === awayTeam) {
+    const message = "Squadra casa e squadra ospite devono essere diverse.";
+    matchForm.homeTeam.setCustomValidity(message);
+    matchForm.awayTeam.setCustomValidity(message);
+    matchForm.homeTeam.reportValidity();
+    return false;
+  }
+  clearTeamSelectionValidation();
+  return true;
+}
+
+function clearTeamSelectionValidation() {
+  matchForm.homeTeam.setCustomValidity("");
+  matchForm.awayTeam.setCustomValidity("");
 }
 
 function addLineupPlayer(event, team, form) {
@@ -585,15 +611,25 @@ function renderEvents() {
   eventsTable.innerHTML = "";
   for (const event of state.events) {
     const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${event.minute}'</td>
-      <td>${event.team === "home" ? getTeamName("home") : getTeamName("away")}</td>
-      <td>${eventLabels[event.type]}</td>
-      <td>${event.playerNumber ?? event.player ?? "-"}</td>
-      <td>${event.notes || "-"}</td>
-      <td><button class="small danger" data-id="${event.id}">Elimina</button></td>
-    `;
-    row.querySelector("button").addEventListener("click", () => removeEvent(event.id));
+    const minuteCell = document.createElement("td");
+    minuteCell.textContent = `${event.minute}'`;
+    const teamCell = document.createElement("td");
+    teamCell.textContent = event.team === "home" ? getTeamName("home") : getTeamName("away");
+    const typeCell = document.createElement("td");
+    typeCell.textContent = eventLabels[event.type];
+    const playerCell = document.createElement("td");
+    playerCell.textContent = String(event.playerNumber ?? event.player ?? "-");
+    const notesCell = document.createElement("td");
+    notesCell.textContent = event.notes || "-";
+    const actionsCell = document.createElement("td");
+    const removeButton = document.createElement("button");
+    removeButton.className = "small danger";
+    removeButton.type = "button";
+    removeButton.textContent = "Elimina";
+    removeButton.addEventListener("click", () => removeEvent(event.id));
+    actionsCell.append(removeButton);
+
+    row.append(minuteCell, teamCell, typeCell, playerCell, notesCell, actionsCell);
     eventsTable.append(row);
   }
 }
@@ -625,12 +661,22 @@ function renderScoreAndStats() {
   liveHomeGoals.textContent = String(computed.home.goals);
   liveAwayGoals.textContent = String(computed.away.goals);
 
-  stats.innerHTML = `
-    <div><strong>${homeTeamName}</strong><br/>🟨 ${computed.home.yellow} · 🟥 ${computed.home.red}</div>
-    <div><strong>${awayTeamName}</strong><br/>🟨 ${computed.away.yellow} · 🟥 ${computed.away.red}</div>
-    <div><strong>Totale eventi</strong><br/>${state.events.length}</div>
-    <div><strong>Campo</strong><br/>${state.match.stadium || "-"}</div>
-  `;
+  stats.innerHTML = "";
+  stats.append(
+    createStatCard(homeTeamName, `🟨 ${computed.home.yellow} · 🟥 ${computed.home.red}`),
+    createStatCard(awayTeamName, `🟨 ${computed.away.yellow} · 🟥 ${computed.away.red}`),
+    createStatCard("Totale eventi", String(state.events.length)),
+    createStatCard("Campo", state.match.stadium || "-"),
+  );
+}
+
+function createStatCard(title, value) {
+  const card = document.createElement("div");
+  const strong = document.createElement("strong");
+  strong.textContent = title;
+  const lineBreak = document.createElement("br");
+  card.append(strong, lineBreak, document.createTextNode(value));
+  return card;
 }
 
 function getCurrentDateTime() {
@@ -787,7 +833,9 @@ function renderArchiveList() {
     const home = item.state?.match?.homeTeam || "Casa";
     const away = item.state?.match?.awayTeam || "Ospite";
     const when = new Date(item.createdAt).toLocaleString("it-IT");
-    li.innerHTML = `<span>${home} vs ${away} · ${when}</span>`;
+    const info = document.createElement("span");
+    info.textContent = `${home} vs ${away} · ${when}`;
+    li.append(info);
 
     const actions = document.createElement("div");
     const loadBtn = document.createElement("button");
