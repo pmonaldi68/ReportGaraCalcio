@@ -13,88 +13,106 @@
     </header>
 
     <main>
+      <section class="mobile-primary-action" aria-label="Azione principale">
+        <button id="new-report-btn" type="button">Nuovo report</button>
+      </section>
+
       <section class="card">
         <h2>Dettagli gara</h2>
+        <p id="match-form-progress" class="muted">Step 1 di 3</p>
         <form id="match-form" class="grid">
-          <label>
-            Squadra casa
-            <select required name="homeTeam">
-              <option value="">Seleziona squadra casa</option>
-              <option value="ANITRELLA">ANITRELLA</option>
-              <option value="ALATRI">ALATRI</option>
-              <option value="ATLETICO LARIANO">ATLETICO LARIANO</option>
-              <option value="ATLETICO TORRENOVA 1986">ATLETICO TORRENOVA 1986</option>
-              <option value="BELMONTE CASTELLO">BELMONTE CASTELLO</option>
-              <option value="BOVILLE ERNICA CALCIO">BOVILLE ERNICA CALCIO</option>
-              <option value="CITTA DI CEPRANO CALCIO">CITTA DI CEPRANO CALCIO</option>
-              <option value="CITTA MONTE S.G. CAMPANO">CITTA MONTE S.G. CAMPANO</option>
-              <option value="CYNTHIA 1920">CYNTHIA 1920</option>
-              <option value="FOLGORE AMASENO">FOLGORE AMASENO</option>
-              <option value="MAGNITUDO FCCG">MAGNITUDO FCCG</option>
-              <option value="REAL SAN BASILIO 1960">REAL SAN BASILIO 1960</option>
-              <option value="ROCCA PRIORA RDP CALCIO">ROCCA PRIORA RDP CALCIO</option>
-              <option value="VIVACE GROTTAFERRATA 1922">VIVACE GROTTAFERRATA 1922</option>
-              <option value="VIGOR PERCONTI">VIGOR PERCONTI</option>
-              <option value="ATLETICO MORENA">ATLETICO MORENA</option>
-              <option value="POLISPORTIVA DE ROSSI">POLISPORTIVA DE ROSSI</option>
-              <option value="CANARINI 1926 RDP">CANARINI 1926 RDP</option>
-            </select>
-          </label>
-          <label>
-            Squadra ospite
-            <select required name="awayTeam">
-              <option value="">Seleziona squadra ospite</option>
-              <option value="ANITRELLA">ANITRELLA</option>
-              <option value="ALATRI">ALATRI</option>
-              <option value="ATLETICO LARIANO">ATLETICO LARIANO</option>
-              <option value="ATLETICO TORRENOVA 1986">ATLETICO TORRENOVA 1986</option>
-              <option value="BELMONTE CASTELLO">BELMONTE CASTELLO</option>
-              <option value="BOVILLE ERNICA CALCIO">BOVILLE ERNICA CALCIO</option>
-              <option value="CITTA DI CEPRANO CALCIO">CITTA DI CEPRANO CALCIO</option>
-              <option value="CITTA MONTE S.G. CAMPANO">CITTA MONTE S.G. CAMPANO</option>
-              <option value="CYNTHIA 1920">CYNTHIA 1920</option>
-              <option value="FOLGORE AMASENO">FOLGORE AMASENO</option>
-              <option value="MAGNITUDO FCCG">MAGNITUDO FCCG</option>
-              <option value="REAL SAN BASILIO 1960">REAL SAN BASILIO 1960</option>
-              <option value="ROCCA PRIORA RDP CALCIO">ROCCA PRIORA RDP CALCIO</option>
-              <option value="VIVACE GROTTAFERRATA 1922">VIVACE GROTTAFERRATA 1922</option>
-              <option value="VIGOR PERCONTI">VIGOR PERCONTI</option>
-              <option value="ATLETICO MORENA">ATLETICO MORENA</option>
-              <option value="POLISPORTIVA DE ROSSI">POLISPORTIVA DE ROSSI</option>
-              <option value="CANARINI 1926 RDP">CANARINI 1926 RDP</option>
-            </select>
-          </label>
-          <label>
-            Data
-            <input type="date" required name="date" />
-          </label>
-          <label>
-            Orario
-            <input type="time" required name="time" />
-          </label>
-          <label>
-            Campo
-            <select name="stadium">
-              <option value="">Seleziona campo</option>
-              <option value="ABBAFATI ROBERTO">ABBAFATI ROBERTO</option>
-              <option value="ABBATINI BRUNO">ABBATINI BRUNO</option>
-              <option value="BIAMANI UMBERTO">BIAMANI UMBERTO</option>
-              <option value="C.S. VIGOR">C.S. VIGOR</option>
-              <option value="CATENA MASSIMILIANO">CATENA MASSIMILIANO</option>
-              <option value="CEREATE CASAMARI">CEREATE CASAMARI</option>
-              <option value="CHIAPPITTO">CHIAPPITTO</option>
-              <option value="CINECITTA' DUE">CINECITTA' DUE</option>
-              <option value="COMUNALE">COMUNALE</option>
-              <option value="GAVINI LIONELLO">GAVINI LIONELLO</option>
-              <option value="GIANNI FRANCESCA">GIANNI FRANCESCA</option>
-              <option value="LIRI">LIRI</option>
-              <option value="MONTORLI">MONTORLI</option>
-              <option value="SAN VITTORE">SAN VITTORE</option>
-              <option value="SUPERGA">SUPERGA</option>
-              <option value="TRE TORRI B">TRE TORRI B</option>
-            </select>
-          </label>
-          <button type="submit">Salva dettagli gara</button>
+          <fieldset class="match-step" data-step="0">
+            <label>
+              Squadra casa
+              <select required name="homeTeam">
+                <option value="">Seleziona squadra casa</option>
+                <option value="ANITRELLA">ANITRELLA</option>
+                <option value="ALATRI">ALATRI</option>
+                <option value="ATLETICO LARIANO">ATLETICO LARIANO</option>
+                <option value="ATLETICO TORRENOVA 1986">ATLETICO TORRENOVA 1986</option>
+                <option value="BELMONTE CASTELLO">BELMONTE CASTELLO</option>
+                <option value="BOVILLE ERNICA CALCIO">BOVILLE ERNICA CALCIO</option>
+                <option value="CITTA DI CEPRANO CALCIO">CITTA DI CEPRANO CALCIO</option>
+                <option value="CITTA MONTE S.G. CAMPANO">CITTA MONTE S.G. CAMPANO</option>
+                <option value="CYNTHIA 1920">CYNTHIA 1920</option>
+                <option value="FOLGORE AMASENO">FOLGORE AMASENO</option>
+                <option value="MAGNITUDO FCCG">MAGNITUDO FCCG</option>
+                <option value="REAL SAN BASILIO 1960">REAL SAN BASILIO 1960</option>
+                <option value="ROCCA PRIORA RDP CALCIO">ROCCA PRIORA RDP CALCIO</option>
+                <option value="VIVACE GROTTAFERRATA 1922">VIVACE GROTTAFERRATA 1922</option>
+                <option value="VIGOR PERCONTI">VIGOR PERCONTI</option>
+                <option value="ATLETICO MORENA">ATLETICO MORENA</option>
+                <option value="POLISPORTIVA DE ROSSI">POLISPORTIVA DE ROSSI</option>
+                <option value="CANARINI 1926 RDP">CANARINI 1926 RDP</option>
+              </select>
+            </label>
+            <label>
+              Squadra ospite
+              <select required name="awayTeam">
+                <option value="">Seleziona squadra ospite</option>
+                <option value="ANITRELLA">ANITRELLA</option>
+                <option value="ALATRI">ALATRI</option>
+                <option value="ATLETICO LARIANO">ATLETICO LARIANO</option>
+                <option value="ATLETICO TORRENOVA 1986">ATLETICO TORRENOVA 1986</option>
+                <option value="BELMONTE CASTELLO">BELMONTE CASTELLO</option>
+                <option value="BOVILLE ERNICA CALCIO">BOVILLE ERNICA CALCIO</option>
+                <option value="CITTA DI CEPRANO CALCIO">CITTA DI CEPRANO CALCIO</option>
+                <option value="CITTA MONTE S.G. CAMPANO">CITTA MONTE S.G. CAMPANO</option>
+                <option value="CYNTHIA 1920">CYNTHIA 1920</option>
+                <option value="FOLGORE AMASENO">FOLGORE AMASENO</option>
+                <option value="MAGNITUDO FCCG">MAGNITUDO FCCG</option>
+                <option value="REAL SAN BASILIO 1960">REAL SAN BASILIO 1960</option>
+                <option value="ROCCA PRIORA RDP CALCIO">ROCCA PRIORA RDP CALCIO</option>
+                <option value="VIVACE GROTTAFERRATA 1922">VIVACE GROTTAFERRATA 1922</option>
+                <option value="VIGOR PERCONTI">VIGOR PERCONTI</option>
+                <option value="ATLETICO MORENA">ATLETICO MORENA</option>
+                <option value="POLISPORTIVA DE ROSSI">POLISPORTIVA DE ROSSI</option>
+                <option value="CANARINI 1926 RDP">CANARINI 1926 RDP</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <fieldset class="match-step" data-step="1" hidden>
+            <label>
+              Data
+              <input type="date" required name="date" />
+            </label>
+            <label>
+              Orario
+              <input type="time" required name="time" />
+            </label>
+          </fieldset>
+
+          <fieldset class="match-step" data-step="2" hidden>
+            <label>
+              Campo
+              <select name="stadium">
+                <option value="">Seleziona campo</option>
+                <option value="ABBAFATI ROBERTO">ABBAFATI ROBERTO</option>
+                <option value="ABBATINI BRUNO">ABBATINI BRUNO</option>
+                <option value="BIAMANI UMBERTO">BIAMANI UMBERTO</option>
+                <option value="C.S. VIGOR">C.S. VIGOR</option>
+                <option value="CATENA MASSIMILIANO">CATENA MASSIMILIANO</option>
+                <option value="CEREATE CASAMARI">CEREATE CASAMARI</option>
+                <option value="CHIAPPITTO">CHIAPPITTO</option>
+                <option value="CINECITTA' DUE">CINECITTA' DUE</option>
+                <option value="COMUNALE">COMUNALE</option>
+                <option value="GAVINI LIONELLO">GAVINI LIONELLO</option>
+                <option value="GIANNI FRANCESCA">GIANNI FRANCESCA</option>
+                <option value="LIRI">LIRI</option>
+                <option value="MONTORLI">MONTORLI</option>
+                <option value="SAN VITTORE">SAN VITTORE</option>
+                <option value="SUPERGA">SUPERGA</option>
+                <option value="TRE TORRI B">TRE TORRI B</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <div class="step-actions">
+            <button id="match-prev-step" type="button" class="secondary">Indietro</button>
+            <button id="match-next-step" type="button">Avanti</button>
+            <button id="match-save-btn" type="submit" hidden>Salva dettagli gara</button>
+          </div>
         </form>
       </section>
 
@@ -203,7 +221,7 @@
         <form id="event-form" class="grid">
           <label>
             Minuto (automatico)
-            <input type="number" min="0" max="130" name="minute" required readonly />
+            <input type="number" min="0" max="130" name="minute" inputmode="numeric" required readonly />
           </label>
           <label class="checkbox-label">
             <input type="checkbox" name="autoMinute" checked />
@@ -240,7 +258,7 @@
           </label>
           <label>
             Note
-            <input name="notes" placeholder="Assist, motivo, sostituito..." />
+            <input name="notes" placeholder="Assist, motivo, sostituito..." autocomplete="off" />
           </label>
           <button type="submit">Aggiungi evento</button>
         </form>

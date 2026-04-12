@@ -112,6 +112,14 @@ const awayViceCaptainSelect = document.querySelector("#away-vice-captain-select"
 const archiveSaveBtn = document.querySelector("#archive-save-btn");
 const exportPdfBtn = document.querySelector("#export-pdf-btn");
 const archiveList = document.querySelector("#archive-list");
+const newReportBtn = document.querySelector("#new-report-btn");
+const matchSteps = Array.from(document.querySelectorAll(".match-step"));
+const matchFormProgress = document.querySelector("#match-form-progress");
+const matchPrevStepBtn = document.querySelector("#match-prev-step");
+const matchNextStepBtn = document.querySelector("#match-next-step");
+const matchSaveBtn = document.querySelector("#match-save-btn");
+
+let currentMatchFormStep = 0;
 
 matchForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -151,6 +159,20 @@ awayCaptainSelect.addEventListener("change", () => setLeader("away", "captain", 
 awayViceCaptainSelect.addEventListener("change", () => setLeader("away", "viceCaptain", awayViceCaptainSelect.value));
 matchForm.homeTeam.addEventListener("change", clearTeamSelectionValidation);
 matchForm.awayTeam.addEventListener("change", clearTeamSelectionValidation);
+matchForm.addEventListener("input", persistMatchDraftFromForm);
+matchForm.addEventListener("change", persistMatchDraftFromForm);
+matchPrevStepBtn.addEventListener("click", () => goToMatchStep(currentMatchFormStep - 1));
+matchNextStepBtn.addEventListener("click", () => {
+  if (!isCurrentMatchStepValid()) {
+    return;
+  }
+  goToMatchStep(currentMatchFormStep + 1);
+});
+newReportBtn.addEventListener("click", () => {
+  matchForm.scrollIntoView({ behavior: "smooth", block: "start" });
+  goToMatchStep(0);
+  matchForm.homeTeam.focus();
+});
 
 eventForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -221,6 +243,48 @@ function normalizePlayerName(playerName) {
     .trim()
     .replace(/\s+/g, " ")
     .toUpperCase();
+}
+
+function persistMatchDraftFromForm() {
+  const formData = new FormData(matchForm);
+  state.match = {
+    ...state.match,
+    homeTeam: normalizeTeamName(formData.get("homeTeam")),
+    awayTeam: normalizeTeamName(formData.get("awayTeam")),
+    date: String(formData.get("date") || ""),
+    time: String(formData.get("time") || ""),
+    stadium: String(formData.get("stadium") || "").trim(),
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function isCurrentMatchStepValid() {
+  const activeStep = matchSteps[currentMatchFormStep];
+  if (!activeStep) {
+    return false;
+  }
+
+  const stepFields = Array.from(activeStep.querySelectorAll("input, select"));
+  for (const field of stepFields) {
+    if (!field.checkValidity()) {
+      field.reportValidity();
+      return false;
+    }
+  }
+  return true;
+}
+
+function goToMatchStep(nextStep) {
+  currentMatchFormStep = Math.max(0, Math.min(nextStep, matchSteps.length - 1));
+  matchSteps.forEach((step, index) => {
+    step.hidden = index !== currentMatchFormStep;
+  });
+
+  matchFormProgress.textContent = `Step ${currentMatchFormStep + 1} di ${matchSteps.length}`;
+  matchPrevStepBtn.disabled = currentMatchFormStep === 0;
+  const isLastStep = currentMatchFormStep === matchSteps.length - 1;
+  matchNextStepBtn.hidden = isLastStep;
+  matchSaveBtn.hidden = !isLastStep;
 }
 
 function validateTeamsAreDifferent(homeTeam, awayTeam) {
@@ -929,3 +993,4 @@ syncAwayPlayerMode();
 updateSubstitutionFields();
 renderArchiveList();
 render();
+goToMatchStep(0);
