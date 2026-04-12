@@ -41,6 +41,32 @@ main {
   box-shadow: 0 6px 20px rgb(0 0 0 / 7%);
 }
 
+.mobile-primary-action {
+  position: sticky;
+  top: 0.4rem;
+  z-index: 3;
+}
+
+.mobile-primary-action button {
+  width: 100%;
+  min-height: 48px;
+  font-size: 1rem;
+}
+
+.match-step {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.step-actions {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 h1,
 h2,
 p {
@@ -74,6 +100,7 @@ button {
   border: 0;
   font-weight: 600;
   cursor: pointer;
+  min-height: 44px;
 }
 
 button:hover {
@@ -286,6 +313,14 @@ td {
 
 @media (max-width: 900px) {
   .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mobile-primary-action {
+    top: 0;
+  }
+
+  .step-actions {
     grid-template-columns: 1fr;
   }
 

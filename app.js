@@ -112,13 +112,28 @@ const awayViceCaptainSelect = document.querySelector("#away-vice-captain-select"
 const archiveSaveBtn = document.querySelector("#archive-save-btn");
 const exportPdfBtn = document.querySelector("#export-pdf-btn");
 const archiveList = document.querySelector("#archive-list");
+const newReportBtn = document.querySelector("#new-report-btn");
+const matchSteps = Array.from(document.querySelectorAll(".match-step"));
+const matchFormProgress = document.querySelector("#match-form-progress");
+const matchPrevStepBtn = document.querySelector("#match-prev-step");
+const matchNextStepBtn = document.querySelector("#match-next-step");
+const matchSaveBtn = document.querySelector("#match-save-btn");
+
+let currentMatchFormStep = 0;
 
 matchForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const formData = new FormData(matchForm);
+  const homeTeam = normalizeTeamName(formData.get("homeTeam"));
+  const awayTeam = normalizeTeamName(formData.get("awayTeam"));
+
+  if (!validateTeamsAreDifferent(homeTeam, awayTeam)) {
+    return;
+  }
+
   state.match = {
-    homeTeam: normalizeTeamName(formData.get("homeTeam")),
-    awayTeam: normalizeTeamName(formData.get("awayTeam")),
+    homeTeam,
+    awayTeam,
     date: formData.get("date"),
     time: formData.get("time"),
     stadium: formData.get("stadium").trim(),
@@ -142,6 +157,22 @@ homeCaptainSelect.addEventListener("change", () => setLeader("home", "captain", 
 homeViceCaptainSelect.addEventListener("change", () => setLeader("home", "viceCaptain", homeViceCaptainSelect.value));
 awayCaptainSelect.addEventListener("change", () => setLeader("away", "captain", awayCaptainSelect.value));
 awayViceCaptainSelect.addEventListener("change", () => setLeader("away", "viceCaptain", awayViceCaptainSelect.value));
+matchForm.homeTeam.addEventListener("change", clearTeamSelectionValidation);
+matchForm.awayTeam.addEventListener("change", clearTeamSelectionValidation);
+matchForm.addEventListener("input", persistMatchDraftFromForm);
+matchForm.addEventListener("change", persistMatchDraftFromForm);
+matchPrevStepBtn.addEventListener("click", () => goToMatchStep(currentMatchFormStep - 1));
+matchNextStepBtn.addEventListener("click", () => {
+  if (!isCurrentMatchStepValid()) {
+    return;
+  }
+  goToMatchStep(currentMatchFormStep + 1);
+});
+newReportBtn.addEventListener("click", () => {
+  matchForm.scrollIntoView({ behavior: "smooth", block: "start" });
+  goToMatchStep(0);
+  matchForm.homeTeam.focus();
+});
 
 eventForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -212,6 +243,65 @@ function normalizePlayerName(playerName) {
     .trim()
     .replace(/\s+/g, " ")
     .toUpperCase();
+}
+
+function persistMatchDraftFromForm() {
+  const formData = new FormData(matchForm);
+  state.match = {
+    ...state.match,
+    homeTeam: normalizeTeamName(formData.get("homeTeam")),
+    awayTeam: normalizeTeamName(formData.get("awayTeam")),
+    date: String(formData.get("date") || ""),
+    time: String(formData.get("time") || ""),
+    stadium: String(formData.get("stadium") || "").trim(),
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function isCurrentMatchStepValid() {
+  const activeStep = matchSteps[currentMatchFormStep];
+  if (!activeStep) {
+    return false;
+  }
+
+  const stepFields = Array.from(activeStep.querySelectorAll("input, select"));
+  for (const field of stepFields) {
+    if (!field.checkValidity()) {
+      field.reportValidity();
+      return false;
+    }
+  }
+  return true;
+}
+
+function goToMatchStep(nextStep) {
+  currentMatchFormStep = Math.max(0, Math.min(nextStep, matchSteps.length - 1));
+  matchSteps.forEach((step, index) => {
+    step.hidden = index !== currentMatchFormStep;
+  });
+
+  matchFormProgress.textContent = `Step ${currentMatchFormStep + 1} di ${matchSteps.length}`;
+  matchPrevStepBtn.disabled = currentMatchFormStep === 0;
+  const isLastStep = currentMatchFormStep === matchSteps.length - 1;
+  matchNextStepBtn.hidden = isLastStep;
+  matchSaveBtn.hidden = !isLastStep;
+}
+
+function validateTeamsAreDifferent(homeTeam, awayTeam) {
+  if (homeTeam && awayTeam && homeTeam === awayTeam) {
+    const message = "Squadra casa e squadra ospite devono essere diverse.";
+    matchForm.homeTeam.setCustomValidity(message);
+    matchForm.awayTeam.setCustomValidity(message);
+    matchForm.homeTeam.reportValidity();
+    return false;
+  }
+  clearTeamSelectionValidation();
+  return true;
+}
+
+function clearTeamSelectionValidation() {
+  matchForm.homeTeam.setCustomValidity("");
+  matchForm.awayTeam.setCustomValidity("");
 }
 
 function addLineupPlayer(event, team, form) {
@@ -585,15 +675,25 @@ function renderEvents() {
   eventsTable.innerHTML = "";
   for (const event of state.events) {
     const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${event.minute}'</td>
-      <td>${event.team === "home" ? getTeamName("home") : getTeamName("away")}</td>
-      <td>${eventLabels[event.type]}</td>
-      <td>${event.playerNumber ?? event.player ?? "-"}</td>
-      <td>${event.notes || "-"}</td>
-      <td><button class="small danger" data-id="${event.id}">Elimina</button></td>
-    `;
-    row.querySelector("button").addEventListener("click", () => removeEvent(event.id));
+    const minuteCell = document.createElement("td");
+    minuteCell.textContent = `${event.minute}'`;
+    const teamCell = document.createElement("td");
+    teamCell.textContent = event.team === "home" ? getTeamName("home") : getTeamName("away");
+    const typeCell = document.createElement("td");
+    typeCell.textContent = eventLabels[event.type];
+    const playerCell = document.createElement("td");
+    playerCell.textContent = String(event.playerNumber ?? event.player ?? "-");
+    const notesCell = document.createElement("td");
+    notesCell.textContent = event.notes || "-";
+    const actionsCell = document.createElement("td");
+    const removeButton = document.createElement("button");
+    removeButton.className = "small danger";
+    removeButton.type = "button";
+    removeButton.textContent = "Elimina";
+    removeButton.addEventListener("click", () => removeEvent(event.id));
+    actionsCell.append(removeButton);
+
+    row.append(minuteCell, teamCell, typeCell, playerCell, notesCell, actionsCell);
     eventsTable.append(row);
   }
 }
@@ -625,12 +725,22 @@ function renderScoreAndStats() {
   liveHomeGoals.textContent = String(computed.home.goals);
   liveAwayGoals.textContent = String(computed.away.goals);
 
-  stats.innerHTML = `
-    <div><strong>${homeTeamName}</strong><br/>🟨 ${computed.home.yellow} · 🟥 ${computed.home.red}</div>
-    <div><strong>${awayTeamName}</strong><br/>🟨 ${computed.away.yellow} · 🟥 ${computed.away.red}</div>
-    <div><strong>Totale eventi</strong><br/>${state.events.length}</div>
-    <div><strong>Campo</strong><br/>${state.match.stadium || "-"}</div>
-  `;
+  stats.innerHTML = "";
+  stats.append(
+    createStatCard(homeTeamName, `🟨 ${computed.home.yellow} · 🟥 ${computed.home.red}`),
+    createStatCard(awayTeamName, `🟨 ${computed.away.yellow} · 🟥 ${computed.away.red}`),
+    createStatCard("Totale eventi", String(state.events.length)),
+    createStatCard("Campo", state.match.stadium || "-"),
+  );
+}
+
+function createStatCard(title, value) {
+  const card = document.createElement("div");
+  const strong = document.createElement("strong");
+  strong.textContent = title;
+  const lineBreak = document.createElement("br");
+  card.append(strong, lineBreak, document.createTextNode(value));
+  return card;
 }
 
 function getCurrentDateTime() {
@@ -787,7 +897,9 @@ function renderArchiveList() {
     const home = item.state?.match?.homeTeam || "Casa";
     const away = item.state?.match?.awayTeam || "Ospite";
     const when = new Date(item.createdAt).toLocaleString("it-IT");
-    li.innerHTML = `<span>${home} vs ${away} · ${when}</span>`;
+    const info = document.createElement("span");
+    info.textContent = `${home} vs ${away} · ${when}`;
+    li.append(info);
 
     const actions = document.createElement("div");
     const loadBtn = document.createElement("button");
@@ -881,3 +993,4 @@ syncAwayPlayerMode();
 updateSubstitutionFields();
 renderArchiveList();
 render();
+goToMatchStep(0);
